@@ -1,0 +1,218 @@
+{
+  "name": "술래 - 멀티 플랫폼 동시 발송",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meeting-created",
+        "options": {}
+      },
+      "id": "webhook-multi",
+      "name": "Webhook - Meeting Created",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nconst gameEmojis = {\n  '경찰과 도둑': '👮',\n  '얼음땡': '🧊',\n  '숨바꼭질': '👀',\n  '깃발뺏기': '🚩',\n  '커스텀': '🎮'\n};\nconst emoji = gameEmojis[data.gameTypeName] || '🏃';\n\n// Twitter (280자 제한 고려)\nconst twitter = `${emoji} ${data.gameTypeName} 모임!\n\n📍 ${data.location}\n⏰ ${data.meetingTimeFormatted}\n👥 ${data.maxParticipants}명\n\n코드: ${data.joinCode}\n\n#술래 #술래잡기 #동네모임`;\n\n// Discord (Embed용)\nconst discord = {\n  title: `${emoji} ${data.title}`,\n  description: data.description,\n  location: data.location,\n  gameType: data.gameTypeName,\n  time: data.meetingTimeFormatted,\n  participants: data.maxParticipants,\n  joinCode: data.joinCode\n};\n\n// Telegram (Markdown)\nconst telegram = `${emoji} *새로운 술래잡기 모임!*\n\n📍 장소: ${data.location}\n🎮 게임: ${data.gameTypeName}\n⏰ 시간: ${data.meetingTimeFormatted}\n👥 모집: ${data.maxParticipants}명\n\n🔑 참가코드: \\`${data.joinCode}\\``;\n\nreturn [{\n  json: {\n    original: data,\n    twitter,\n    discord,\n    telegram\n  }\n}];"
+      },
+      "id": "code-multi",
+      "name": "Format All Platforms",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.twitter }}",
+        "additionalFields": {}
+      },
+      "id": "twitter-multi",
+      "name": "Post to Twitter",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [700, 250],
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "YOUR_TWITTER_CREDENTIAL_ID",
+          "name": "Twitter Sullae"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "",
+        "options": {
+          "embeds": [
+            {
+              "title": "={{ $json.discord.title }}",
+              "description": "={{ $json.discord.description }}",
+              "color": 5814783,
+              "fields": [
+                {
+                  "name": "📍 장소",
+                  "value": "={{ $json.discord.location }}",
+                  "inline": true
+                },
+                {
+                  "name": "🎮 게임",
+                  "value": "={{ $json.discord.gameType }}",
+                  "inline": true
+                },
+                {
+                  "name": "⏰ 시간",
+                  "value": "={{ $json.discord.time }}",
+                  "inline": false
+                },
+                {
+                  "name": "🔑 참가코드",
+                  "value": "`={{ $json.discord.joinCode }}`",
+                  "inline": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "id": "discord-multi",
+      "name": "Post to Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [700, 400],
+      "webhookId": "YOUR_DISCORD_WEBHOOK_URL"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHANNEL_ID",
+        "text": "={{ $json.telegram }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-multi",
+      "name": "Post to Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [700, 550],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Sullae Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.all();\n\nconst summary = {\n  timestamp: new Date().toISOString(),\n  meetingId: $('Format All Platforms').first().json.original.meetingId,\n  platforms: {\n    twitter: results[0]?.json?.id ? 'success' : 'failed',\n    discord: results[1]?.json?.id ? 'success' : 'failed',\n    telegram: results[2]?.json?.message_id ? 'success' : 'failed'\n  }\n};\n\nreturn [{ json: summary }];"
+      },
+      "id": "code-summary",
+      "name": "Summarize Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [950, 400]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "merge-multi",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [850, 400]
+    }
+  ],
+  "connections": {
+    "Webhook - Meeting Created": {
+      "main": [
+        [
+          {
+            "node": "Format All Platforms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format All Platforms": {
+      "main": [
+        [
+          {
+            "node": "Post to Twitter",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Post to Discord",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Post to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Twitter": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Discord": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Telegram": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Summarize Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "술래"
+    },
+    {
+      "name": "Multi-Platform"
+    }
+  ]
+}

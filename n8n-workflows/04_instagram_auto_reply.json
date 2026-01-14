@@ -1,0 +1,191 @@
+{
+  "name": "술래 - Instagram 자동 응답",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule-ig",
+      "name": "Schedule - Every 5 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v18.0/={{ $credentials.instagramBusinessAccountId }}/media",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "options": {},
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "fields",
+              "value": "id,comments.limit(50){id,text,from,timestamp,replies}"
+            }
+          ]
+        }
+      },
+      "id": "http-ig-1",
+      "name": "Get Recent Media & Comments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_IG_CREDENTIAL_ID",
+          "name": "Instagram Graph API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.first().json.data || [];\nconst keywords = {\n  download: ['다운', '앱', '어디서', '설치', '다운로드'],\n  howto: ['어떻게', '참가', '방법', '가입'],\n  location: ['서울', '경기', '부산', '대구', '인천'],\n  positive: ['재밌', '좋아', '굿', '대박', '최고']\n};\n\nconst responses = {\n  download: '앱 다운로드는 프로필 링크에서! 🏃 동네에서 술래잡기 같이해요!',\n  howto: '앱 설치 후 참가코드 입력하면 끝! 쉽죠? 😊',\n  location: '해당 지역 모임 있어요! 앱에서 확인해보세요 📍',\n  positive: '감사합니다! 다음에 같이 뛰어요 🏃‍♂️'\n};\n\nconst results = [];\n\nfor (const media of items) {\n  const comments = media.comments?.data || [];\n  \n  for (const comment of comments) {\n    // 이미 답글이 있으면 스킵\n    if (comment.replies?.data?.length > 0) continue;\n    \n    const text = comment.text.toLowerCase();\n    let responseType = null;\n    \n    // 키워드 매칭\n    for (const [type, words] of Object.entries(keywords)) {\n      if (words.some(word => text.includes(word))) {\n        responseType = type;\n        break;\n      }\n    }\n    \n    if (responseType) {\n      results.push({\n        commentId: comment.id,\n        username: comment.from?.username || 'user',\n        originalText: comment.text,\n        responseType,\n        response: `@${comment.from?.username || 'user'} ${responses[responseType]}`\n      });\n    }\n  }\n}\n\nreturn results.map(r => ({ json: r }));"
+      },
+      "id": "code-ig-1",
+      "name": "Filter & Match Keywords",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v18.0/{{ $json.commentId }}/replies",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "method": "POST",
+        "body": {
+          "mode": "fields",
+          "fields": [
+            {
+              "name": "message",
+              "value": "={{ $json.response }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-ig-2",
+      "name": "Reply to Comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "YOUR_IG_CREDENTIAL_ID",
+          "name": "Instagram Graph API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "split-ig",
+      "name": "Rate Limit (1 per batch)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "id": "wait-ig",
+      "name": "Wait 2 seconds",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [950, 400]
+    }
+  ],
+  "connections": {
+    "Schedule - Every 5 min": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Media & Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Media & Comments": {
+      "main": [
+        [
+          {
+            "node": "Filter & Match Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter & Match Keywords": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit (1 per batch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit (1 per batch)": {
+      "main": [
+        [
+          {
+            "node": "Reply to Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to Comment": {
+      "main": [
+        [
+          {
+            "node": "Wait 2 seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2 seconds": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit (1 per batch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "술래"
+    },
+    {
+      "name": "Instagram"
+    }
+  ]
+}

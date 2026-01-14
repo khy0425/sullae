@@ -1,0 +1,304 @@
+{
+  "name": "술래 - Discord 지역별 모임 알림",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meeting-created",
+        "options": {}
+      },
+      "id": "webhook-discord-1",
+      "name": "Webhook - New Meeting",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "강남", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "강남구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "서초", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "서초구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "마포", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "마포구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "홍대", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "마포구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "송파", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "송파구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "잠실", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "송파구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "영등포", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "영등포구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "여의도", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "영등포구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "종로", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "종로구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "용산", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "용산구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "이태원", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "용산구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "성북", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "성북구"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [{ "leftValue": "={{ $json.body.location }}", "rightValue": "강서", "operator": { "type": "string", "operation": "contains" } }]
+              },
+              "renameOutput": true,
+              "outputKey": "강서구"
+            }
+          ],
+          "fallbackOutput": "extra"
+        },
+        "options": {}
+      },
+      "id": "switch-region",
+      "name": "지역 분기",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-gangnam",
+      "name": "Discord - 강남구",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, -200],
+      "credentials": { "discordWebhookApi": { "id": "gangnam", "name": "강남구 웹훅" } }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-seocho",
+      "name": "Discord - 서초구",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, -100],
+      "credentials": { "discordWebhookApi": { "id": "seocho", "name": "서초구 웹훅" } }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-mapo",
+      "name": "Discord - 마포구",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, 0],
+      "credentials": { "discordWebhookApi": { "id": "mapo", "name": "마포구 웹훅" } }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-songpa",
+      "name": "Discord - 송파구",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, 100],
+      "credentials": { "discordWebhookApi": { "id": "songpa", "name": "송파구 웹훅" } }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-yeongdeungpo",
+      "name": "Discord - 영등포구",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, 200],
+      "credentials": { "discordWebhookApi": { "id": "yeongdeungpo", "name": "영등포구 웹훅" } }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-jongno",
+      "name": "Discord - 종로구",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, 300],
+      "credentials": { "discordWebhookApi": { "id": "jongno", "name": "종로구 웹훅" } }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-yongsan",
+      "name": "Discord - 용산구",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, 400],
+      "credentials": { "discordWebhookApi": { "id": "yongsan", "name": "용산구 웹훅" } }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-seongbuk",
+      "name": "Discord - 성북구",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, 500],
+      "credentials": { "discordWebhookApi": { "id": "seongbuk", "name": "성북구 웹훅" } }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-gangseo",
+      "name": "Discord - 강서구",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, 600],
+      "credentials": { "discordWebhookApi": { "id": "gangseo", "name": "강서구 웹훅" } }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🏃 **새로운 술래잡기 모임!**\n📍 장소: {{ $json.body.location }}\n🎮 게임: {{ $json.body.gameTypeName }}\n⏰ 시간: {{ $json.body.meetingTimeFormatted }}\n👥 인원: {{ $json.body.maxParticipants }}명\n🔑 코드: {{ $json.body.joinCode }}",
+        "options": {}
+      },
+      "id": "discord-etc",
+      "name": "Discord - 기타지역",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, 700],
+      "credentials": { "discordWebhookApi": { "id": "etc", "name": "기타지역 웹훅" } }
+    }
+  ],
+  "connections": {
+    "Webhook - New Meeting": {
+      "main": [
+        [
+          {
+            "node": "지역 분기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "지역 분기": {
+      "main": [
+        [{ "node": "Discord - 강남구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 서초구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 마포구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 마포구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 송파구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 송파구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 영등포구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 영등포구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 종로구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 용산구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 용산구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 성북구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 강서구", "type": "main", "index": 0 }],
+        [{ "node": "Discord - 기타지역", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "술래" },
+    { "name": "Discord" }
+  ]
+}

@@ -1,0 +1,358 @@
+{
+  "@@locale": "en",
+
+  "appName": "Sullae",
+  "appTagline": "Let's play together!",
+
+  "navExplore": "Explore",
+  "navMyMeetings": "My Games",
+  "navProfile": "Profile",
+
+  "createMeeting": "Create Game",
+  "gameType": "Game Type",
+  "meetingTitle": "Game Title",
+  "meetingTitleHint": "e.g. Cops and Robbers at the Park!",
+  "meetingTitleRequired": "Please enter a game title",
+  "meetingDescription": "Description",
+  "meetingDescriptionHint": "Describe your game",
+  "location": "Location",
+  "locationHint": "e.g. Central Park",
+  "locationRequired": "Please enter a location",
+  "locationDetail": "Detailed Location (optional)",
+  "locationDetailHint": "e.g. Near the fountain",
+  "dateTime": "Date & Time",
+  "maxParticipants": "Max Players",
+  "participantsUnit": "{count} players",
+  "@participantsUnit": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "createMeetingFailed": "Failed to create game",
+
+  "gameCopsAndRobbers": "Cops and Robbers",
+  "gameFreezeTag": "Freeze Tag",
+  "gameHideAndSeek": "Hide and Seek",
+  "gameCaptureFlag": "Capture the Flag",
+  "gameCustom": "Custom",
+
+  "filterAll": "All",
+
+  "noRecruitingMeetings": "No games available",
+  "createNewMeeting": "Create a new game!",
+  "noJoinedMeetings": "No games joined",
+
+  "gamesPlayedCount": "{count} games played",
+  "@gamesPlayedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "statParticipation": "Played",
+  "statHosting": "Hosted",
+  "statMvp": "MVP",
+
+  "changeNickname": "Change Nickname",
+  "newNickname": "New Nickname",
+  "notificationSettings": "Notifications",
+  "help": "Help",
+  "logout": "Logout",
+  "cancel": "Cancel",
+  "change": "Change",
+  "ok": "OK",
+  "no": "No",
+  "complete": "Complete",
+  "later": "Later",
+
+  "loginWithKakao": "Continue with Kakao",
+  "loginWithGoogle": "Continue with Google",
+  "loginWithApple": "Continue with Apple",
+  "termsNotice": "By continuing, you agree to our Terms of Service\nand Privacy Policy.",
+
+  "nicknameSetup": "Set Nickname",
+  "enterNickname": "Enter your nickname",
+  "nicknameGuide": "Choose a name\nfor the game",
+  "nicknameHint": "2-10 characters",
+  "nicknameFormat": "Letters and numbers, 2-10 characters",
+  "nicknameRequired": "Please enter a nickname",
+  "nicknameTooShort": "At least 2 characters",
+  "nicknameTooLong": "Maximum 10 characters",
+  "nicknameInvalid": "Letters and numbers only",
+  "checkingDuplicate": "Checking availability...",
+  "nicknameAvailable": "This nickname is available!",
+  "startGame": "Let's Play!",
+
+  "selectAgeGroup": "Select Age Group",
+  "ageGuide": "Tell us your age group",
+  "ageGroupOptional": "Optional. Used for better game recommendations.",
+  "ageMatchingHelp": "Helps match with similar age groups\n(You can skip this)",
+  "ageGroup10s": "Teens",
+  "ageGroup20s": "20s",
+  "ageGroup30s": "30s",
+  "ageGroup40sPlus": "40s+",
+  "skip": "Skip",
+  "next": "Next",
+  "startPrivately": "Start Privately",
+  "signupFailed": "Sign up failed. Please try again.",
+
+  "gameTime": "Game Time",
+  "minutesUnit": "{count} min",
+  "@minutesUnit": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "teamAssignment": "Team Assignment",
+  "shuffleTeamHint": "Tap shuffle to assign teams",
+  "startGameButton": "Start Game",
+  "remainingTime": "Time Remaining",
+  "shuffleTeam": "Shuffle",
+  "endGame": "End Game",
+  "gameEndTitle": "Game Over!",
+  "endGameConfirmTitle": "End game?",
+  "endGameConfirmMessage": "This will end the current game.",
+  "mvpVoteConfirm": "Start MVP voting?",
+
+  "pause": "Pause",
+  "resume": "Resume",
+  "paused": "PAUSED",
+  "tapToPause": "Tap to pause",
+  "tapToResume": "Tap to resume",
+  "mvpVoteButton": "MVP Vote",
+  "mvpVoteCreated": "MVP vote has been created!",
+
+  "roleCops": "Cops",
+  "roleRobbers": "Robbers",
+  "roleSeeker": "Seeker",
+  "roleRunner": "Runner",
+  "roleHider": "Hider",
+  "roleTeamA": "Team A",
+  "roleTeamB": "Team B",
+
+  "meetingChat": "Chat",
+  "meetingInfo": "Info",
+  "meetingParticipants": "Players",
+  "meetingHost": "Host",
+  "meetingStatus": "Status",
+  "meetingStatusRecruiting": "Open",
+  "meetingStatusInProgress": "In Progress",
+  "meetingStatusFinished": "Finished",
+
+  "joinMeeting": "Join",
+  "leaveMeeting": "Leave",
+  "cancelMeeting": "Cancel Game",
+  "cancelMeetingConfirm": "Are you sure you want to cancel this game?",
+  "cancelMeetingButton": "Cancel Game",
+  "startMeeting": "Start Game",
+  "joinedMeeting": "You joined the game!",
+  "noMessages": "No messages yet",
+
+  "quickMessageArrived": "I'm here!",
+  "quickMessageLate5": "5 min late",
+  "quickMessageLate10": "10 min late",
+  "quickMessageReady": "Ready to play!",
+  "quickMessageOnMyWay": "On my way",
+  "quickMessageCantMake": "Can't make it today",
+  "quickMessageWhereAreYou": "Where are you?",
+  "quickMessageStartSoon": "Starting soon",
+
+  "enterMessage": "Type a message...",
+  "send": "Send",
+
+  "systemSender": "System",
+  "meetingCreated": "Game created.",
+  "meetingCancelled": "Game cancelled.",
+  "gameStarted": "Game has started!",
+  "userJoined": "{nickname} joined.",
+  "@userJoined": {
+    "placeholders": {
+      "nickname": {"type": "String"}
+    }
+  },
+  "userLeft": "{nickname} left.",
+  "@userLeft": {
+    "placeholders": {
+      "nickname": {"type": "String"}
+    }
+  },
+
+  "phaseRoleConfirm": "Check Roles",
+  "phaseRoleConfirmCopsDesc": "Check your Cop/Robber role",
+  "phaseRoleConfirmSeekerDesc": "Check your Seeker/Runner role",
+  "phaseRoleConfirmHiderDesc": "Check your Seeker/Hider role",
+  "phasePrisonConfirm": "Check Jail Location",
+  "phasePrisonConfirmDesc": "Everyone confirms the jail location",
+  "phaseThiefHide": "Robbers Scatter",
+  "phaseThiefHideDesc": "Robbers spread out first",
+  "phasePursuit": "Chase Begins",
+  "phasePursuitDesc": "Cops go catch the robbers",
+  "phaseGameEnd": "Game End",
+  "phaseGameEndCopsDesc": "Timer ends or all caught",
+  "phaseGameEndFreezeDesc": "Timer ends or all frozen",
+  "phaseGameEndHideDesc": "Timer ends or all found",
+  "phaseGameEndFlagDesc": "Target score or timer ends",
+  "phasePrep": "Prepare",
+  "phasePrepDesc": "Runners scatter",
+  "phaseGameStart": "Game Start",
+  "phaseGameStartFreezeDesc": "Seeker yells \"Freeze!\" and starts",
+  "phaseHide": "Hide",
+  "phaseHideDesc": "Hide while seeker counts",
+  "phaseFindStart": "Seek Begins",
+  "phaseFindStartDesc": "Seeker looks for hiders",
+  "phaseTeamConfirm": "Check Teams",
+  "phaseTeamConfirmDesc": "Check Team A/B territories",
+  "phaseFlagPlace": "Place Flags",
+  "phaseFlagPlaceDesc": "Place flags in each team's territory",
+  "phaseFlagStart": "Capture the opponent's flag!",
+
+  "preferenceNone": "No preference",
+  "preferenceRole1": "Prefer {role}",
+  "@preferenceRole1": {
+    "placeholders": {
+      "role": {"type": "String"}
+    }
+  },
+  "teamBalanced": "Teams are balanced. Ready to start!",
+  "teamNoneWillBeRandom": "No-preference players will be randomly assigned.",
+  "teamExcess": "{count} extra {role} players. {count} will be randomly assigned to {otherRole}.",
+  "@teamExcess": {
+    "placeholders": {
+      "role": {"type": "String"},
+      "count": {"type": "int"},
+      "otherRole": {"type": "String"}
+    }
+  },
+  "teamNeedsAdjust": "{count} extra {role} players. Discuss adjustments or start as is.",
+  "@teamNeedsAdjust": {
+    "placeholders": {
+      "role": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+  "teamUnbalanced": "Teams are unbalanced. Adjust or start as is.",
+
+  "localRulePrisonLocation": "Jail Location",
+  "localRulePrisonLocationDesc": "Where caught robbers wait",
+  "localRuleJailBreak": "Jail Break Allowed",
+  "localRuleJailBreakDesc": "Teammates can rescue by touching jail",
+  "localRuleBoundary": "Boundary",
+  "localRuleBoundaryDesc": "Game area limits",
+  "localRuleSafeZone": "No Safe Zone",
+  "localRuleSafeZoneDesc": "Play without safe zones",
+  "localRuleTagMethod": "Tag Method",
+  "localRuleTagMethodDesc": "Two-hand/one-hand/shoulder tag",
+  "localRuleFreezeRelease": "Unfreeze",
+  "localRuleFreezeReleaseDesc": "Teammate touch to unfreeze",
+  "localRuleSeekerCount": "Seeker Count",
+  "localRuleSeekerCountDesc": "Adjust seekers based on players",
+  "localRuleHidingTime": "Hiding Time",
+  "localRuleHidingTimeDesc": "Count time (e.g. 30 seconds)",
+  "localRuleHintAllowed": "Hints Allowed",
+  "localRuleHintAllowedDesc": "Hiders can make sounds as hints",
+  "localRuleFlagReturn": "Flag Return",
+  "localRuleFlagReturnDesc": "Flag returns to base when tagged",
+  "localRuleTeamTag": "Team Tag",
+  "localRuleTeamTagDesc": "Tagged in enemy territory goes to jail",
+
+  "joinWithCode": "Join with Code",
+  "enterJoinCode": "Enter Join Code",
+  "joinCodeHint": "6-digit code",
+  "joinCodeInvalid": "Please enter a 6-digit code",
+  "joinCodeNotFound": "Game not found",
+  "join": "Join",
+
+  "search": "Search",
+  "searchMeetings": "Search games...",
+  "filterTimeAll": "All",
+  "filterTimeToday": "Today",
+  "filterTimeTomorrow": "Tomorrow",
+  "filterTimeThisWeek": "This Week",
+  "showRecruitingOnly": "Open Only",
+  "showAll": "Show All",
+  "activeFilters": "{count} filters active",
+  "@activeFilters": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "clearFilters": "Clear Filters",
+
+  "filterTitle": "Filters",
+  "applyFilters": "Apply",
+  "resetFilters": "Reset",
+
+  "filterRegion": "Region",
+  "regionAll": "All",
+  "regionSeoul": "Seoul",
+  "regionGyeonggi": "Gyeonggi",
+  "regionIncheon": "Incheon",
+  "regionBusan": "Busan",
+  "regionDaegu": "Daegu",
+  "regionDaejeon": "Daejeon",
+  "regionGwangju": "Gwangju",
+  "regionUlsan": "Ulsan",
+  "regionSejong": "Sejong",
+  "regionGangwon": "Gangwon",
+  "regionChungbuk": "Chungbuk",
+  "regionChungnam": "Chungnam",
+  "regionJeonbuk": "Jeonbuk",
+  "regionJeonnam": "Jeonnam",
+  "regionGyeongbuk": "Gyeongbuk",
+  "regionGyeongnam": "Gyeongnam",
+  "regionJeju": "Jeju",
+
+  "filterAgeGroup": "Age Group",
+  "ageGroupAll": "Any",
+  "ageGroupTeens": "Teens",
+  "ageGroupTwenties": "20s",
+  "ageGroupThirties": "30s",
+  "ageGroupFortyPlus": "40s+",
+
+  "filterGroupSize": "Group Size",
+  "groupSizeSmall": "Small (4-8)",
+  "groupSizeMedium": "Medium (9-15)",
+  "groupSizeLarge": "Large (16+)",
+
+  "filterDifficulty": "Atmosphere",
+  "difficultyCasual": "Casual",
+  "difficultyCompetitive": "Competitive",
+  "difficultyBeginner": "Beginner Friendly",
+
+  "moreFilters": "More Filters",
+
+  "buyCoffee": "Buy Coffee for Developer",
+  "buyCoffeeDescription": "Support the developer",
+  "buyCoffeeButton": "Support",
+  "donationMessage": "If this app was helpful, you can optionally support the developer.\nThis is not related to ads or extra features.",
+  "donationThanks": "Thank you! I'll make an even better app ☕",
+  "donationFailed": "Purchase failed. Please try again later.",
+  "donationHint": "You can support the developer with 'Buy Coffee' in Settings ☕",
+
+  "shareMeeting": "Share Game",
+  "gatherPeople": "Gather People",
+  "gatherPeopleDesc": "Create and share an invite message",
+  "whereToShare": "Where will you share?",
+  "messageStyle": "Message Style",
+  "toneCasual": "Casual",
+  "toneCasualDesc": "For friends",
+  "toneEnthusiastic": "Enthusiastic",
+  "toneEnthusiasticDesc": "Community posting",
+  "chatLinkOptional": "Chat Link (optional)",
+  "chatLinkHint": "Add a chat link to include it in the message",
+  "preview": "Preview",
+  "copyMessage": "Copy Message",
+  "messageCopied": "Invite message copied",
+  "copyAndPasteHint": "Paste this in your messaging app or social media",
+  "joinCode": "Join Code",
+  "joinCodeCopied": "Join code copied",
+  "copyCode": "Copy Code",
+  "qrCode": "QR Code",
+  "showToFriends": "Show this to your friends",
+  "externalChatLink": "External Chat Link",
+  "externalChatLinkHint": "URL for external chat room (e.g. Discord)",
+  "goToChatroom": "Go to Chatroom",
+  "channelKakao": "KakaoTalk",
+  "channelOpenChat": "Open Chat",
+  "channelInstagram": "Instagram",
+  "channelCommunity": "Community"
+}

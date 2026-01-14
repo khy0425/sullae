@@ -1,0 +1,85 @@
+{
+  "name": "술래 - Discord 지역별 알림 (HTTP)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meeting-regional",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "meeting-regional"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 지역별 웹훅 URL 매핑\nconst webhooks = {\n  '강남': 'https://discord.com/api/webhooks/1324349970610118747/gG-4A5_87mT-GUBiC0u-p-LFJMfj_DTBG8F3XiJuNKNlKqbPGTuEvR3aE09kMTKZepx4',\n  '서초': 'https://discord.com/api/webhooks/1324350054114607154/R10vr2VaDlNzBM2Ey0r2-_z0aTTdWdJJH_OU2EYLQaOFqbsK5FRt2b58QUyxMPJUPd6_',\n  '마포': 'https://discord.com/api/webhooks/1324350101044711457/L5VILc7hN-N-Cj-f5e2oGODujy_YiPsGwwOoHMuuHcGwmLVgFg5_lCJ61oGsWRLe7Pjq',\n  '홍대': 'https://discord.com/api/webhooks/1324350101044711457/L5VILc7hN-N-Cj-f5e2oGODujy_YiPsGwwOoHMuuHcGwmLVgFg5_lCJ61oGsWRLe7Pjq',\n  '송파': 'https://discord.com/api/webhooks/1324350143335903284/fdhCIvmNy40TlPvVp9Q6pJz51fzjTiVE-j-qI4d1u0_M5fLf8pJezz3zLKqxHg14UXXI',\n  '잠실': 'https://discord.com/api/webhooks/1324350143335903284/fdhCIvmNy40TlPvVp9Q6pJz51fzjTiVE-j-qI4d1u0_M5fLf8pJezz3zLKqxHg14UXXI',\n  '영등포': 'https://discord.com/api/webhooks/1324350182401593406/9ukxGpDOPTyFCW2eeNlnMN0vLv9UM3kOgAq8V_i_R7KuWvgI2Gy8c3wP0zSn5LX6cNSP',\n  '여의도': 'https://discord.com/api/webhooks/1324350182401593406/9ukxGpDOPTyFCW2eeNlnMN0vLv9UM3kOgAq8V_i_R7KuWvgI2Gy8c3wP0zSn5LX6cNSP',\n  '종로': 'https://discord.com/api/webhooks/1324350224160063529/oLLzN7bWHPzw2gI6oS8BVvLv5o7DJc3UmE5L4K4UrPNfM5L2K7mP3qR8wT9yB2xF6cNS',\n  '용산': 'https://discord.com/api/webhooks/1324350265859829793/pMMaO8cXIPax3hJ7pT9CVwMw6p8EKd4VnF6M5L5VsQOgN6M3L8nQ4rS9xU0zC3yG7dOT',\n  '이태원': 'https://discord.com/api/webhooks/1324350265859829793/pMMaO8cXIPax3hJ7pT9CVwMw6p8EKd4VnF6M5L5VsQOgN6M3L8nQ4rS9xU0zC3yG7dOT',\n  '성북': 'https://discord.com/api/webhooks/1324350306741493781/qNNbP9dYJQby4iK8qU0DWxNx7q9FLe5WoG7N6M6WtRPhO7N4M9oR5sT0yV1aD4zH8ePU',\n  '강서': 'https://discord.com/api/webhooks/1324350348399489054/rOOcQ0eZKRcz5jL9rV1EXyOy8r0GMf6XpH8O7N7XuSQiP8O5N0pS6tU1zW2bE5aI9fQV'\n};\n\n// 기타지역 웹훅\nconst defaultWebhook = 'https://discord.com/api/webhooks/1324350389759594527/sQQdR1faMSda6kM0sW2FYzPz9s1HNg7YqI9P8O8YvTRjQ9P6O1qT7uV2aX3cF6bJ0gRW';\n\nconst location = $input.first().json.body.location || '';\nlet webhookUrl = defaultWebhook;\n\n// 지역 키워드 매칭\nfor (const [keyword, url] of Object.entries(webhooks)) {\n  if (location.includes(keyword)) {\n    webhookUrl = url;\n    break;\n  }\n}\n\n// 메시지 생성\nconst message = {\n  content: `🏃 **새로운 술래잡기 모임!**\\n📍 장소: ${$input.first().json.body.location}\\n🎮 게임: ${$input.first().json.body.gameTypeName}\\n⏰ 시간: ${$input.first().json.body.meetingTimeFormatted}\\n👥 인원: ${$input.first().json.body.maxParticipants}명\\n🔑 코드: ${$input.first().json.body.joinCode}`\n};\n\nreturn [{\n  json: {\n    webhookUrl,\n    message\n  }\n}];"
+      },
+      "id": "code-1",
+      "name": "지역 매핑",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.webhookUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-1",
+      "name": "Discord 전송",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [750, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "지역 매핑",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "지역 매핑": {
+      "main": [
+        [
+          {
+            "node": "Discord 전송",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

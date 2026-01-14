@@ -1,0 +1,295 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==================== 헬퍼 함수 ====================
+
+    // 인증된 사용자인지 확인
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // 현재 사용자 ID
+    function userId() {
+      return request.auth.uid;
+    }
+
+    // 요청한 사용자가 문서 소유자인지 확인
+    function isOwner(ownerId) {
+      return isAuthenticated() && userId() == ownerId;
+    }
+
+    // 모임 데이터 가져오기
+    function getMeeting(meetingId) {
+      return get(/databases/$(database)/documents/meetings/$(meetingId)).data;
+    }
+
+    // 모임의 방장인지 확인
+    function isMeetingHost(meetingId) {
+      return isAuthenticated() && getMeeting(meetingId).hostId == userId();
+    }
+
+    // 모임의 참가자인지 확인
+    function isMeetingParticipant(meetingId) {
+      return isAuthenticated() && userId() in getMeeting(meetingId).participantIds;
+    }
+
+    // ==================== 사용자 (users) ====================
+    match /users/{uid} {
+      // 읽기: 인증된 사용자는 기본 프로필 조회 가능 (닉네임, 프로필 이미지 등)
+      allow read: if isAuthenticated();
+
+      // 생성: 자신의 문서만 생성 가능
+      allow create: if isOwner(uid);
+
+      // 수정: 자신의 문서만 수정 가능
+      allow update: if isOwner(uid);
+
+      // 삭제: 자신의 계정만 삭제 가능
+      allow delete: if isOwner(uid);
+    }
+
+    // ==================== 모임 (meetings) ====================
+    match /meetings/{meetingId} {
+      // 읽기: 인증된 사용자는 모든 모임 조회 가능
+      allow read: if isAuthenticated();
+
+      // 생성: 인증된 사용자만 모임 생성 가능
+      // hostId가 현재 사용자와 일치해야 함
+      allow create: if isAuthenticated()
+                    && request.resource.data.hostId == userId()
+                    && request.resource.data.participantIds.hasOnly([userId()]);
+
+      // 수정: 방장만 모임 정보 수정 가능
+      // 또는 참가자가 참여/퇴장 시 participantIds, currentParticipants만 수정 가능
+      allow update: if isAuthenticated()
+                    && (
+                      // 방장은 모든 필드 수정 가능
+                      resource.data.hostId == userId()
+                      ||
+                      // 참가자는 참여/퇴장 관련 필드만 수정 가능
+                      (
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['participantIds', 'currentParticipants', 'status'])
+                        && (
+                          // 참가: 자신을 추가
+                          (userId() in request.resource.data.participantIds
+                           && !(userId() in resource.data.participantIds))
+                          ||
+                          // 퇴장: 자신을 제거
+                          (!(userId() in request.resource.data.participantIds)
+                           && userId() in resource.data.participantIds)
+                        )
+                      )
+                    );
+
+      // 삭제: 방장만 삭제 가능
+      allow delete: if isAuthenticated()
+                    && resource.data.hostId == userId();
+
+      // ==================== 채팅 메시지 (messages) ====================
+      match /messages/{messageId} {
+        // 읽기: 모임 참가자만 조회 가능
+        allow read: if isMeetingParticipant(meetingId);
+
+        // 생성: 모임 참가자만 메시지 전송 가능
+        // 시스템 메시지는 type이 'system'이 아닌 경우만 허용
+        allow create: if isMeetingParticipant(meetingId)
+                      && request.resource.data.senderId == userId()
+                      && request.resource.data.type != 'system';
+
+        // 수정: 불가
+        allow update: if false;
+
+        // 삭제: 본인 메시지만 삭제 가능
+        allow delete: if isAuthenticated()
+                      && resource.data.senderId == userId();
+      }
+
+      // ==================== 퀵메시지 (quickMessages) ====================
+      match /quickMessages/{quickMessageId} {
+        // 읽기: 모임 참가자만 조회 가능
+        allow read: if isMeetingParticipant(meetingId);
+
+        // 생성: 모임 참가자만 퀵메시지 전송 가능
+        allow create: if isMeetingParticipant(meetingId)
+                      && request.resource.data.senderId == userId();
+
+        // 수정/삭제: 불가
+        allow update, delete: if false;
+      }
+
+      // ==================== 투표 (votes) ====================
+      match /votes/{voteId} {
+        // 읽기: 모임 참가자만 조회 가능
+        allow read: if isMeetingParticipant(meetingId);
+
+        // 생성: 방장만 투표 생성 가능
+        allow create: if isMeetingHost(meetingId);
+
+        // 수정: 방장은 모든 필드, 참가자는 투표만 가능
+        allow update: if isMeetingHost(meetingId)
+                      || (
+                        isMeetingParticipant(meetingId)
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(['votes', 'votedUserIds'])
+                      );
+
+        // 삭제: 방장만 가능
+        allow delete: if isMeetingHost(meetingId);
+      }
+    }
+
+    // ==================== 게임 세션 (games) ====================
+    match /games/{gameId} {
+      // 읽기: 인증된 사용자는 조회 가능
+      allow read: if isAuthenticated();
+
+      // 생성: 인증된 사용자만 생성 가능
+      allow create: if isAuthenticated();
+
+      // 수정: 인증된 사용자만 수정 가능
+      allow update: if isAuthenticated();
+
+      // 삭제: 불가 (기록 보존)
+      allow delete: if false;
+    }
+
+    // ==================== 알림 (notifications) ====================
+    match /notifications/{notificationId} {
+      // 읽기: 본인의 알림만 조회 가능
+      allow read: if isAuthenticated()
+                  && resource.data.userId == userId();
+
+      // 생성: 인증된 사용자만 알림 생성 가능
+      allow create: if isAuthenticated();
+
+      // 수정: 본인의 알림만 읽음 처리 가능
+      allow update: if isAuthenticated()
+                    && resource.data.userId == userId()
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['read']);
+
+      // 삭제: 본인의 알림만 삭제 가능
+      allow delete: if isAuthenticated()
+                    && resource.data.userId == userId();
+    }
+
+    // ==================== 후기/별점 (reviews) ====================
+    match /reviews/{reviewId} {
+      // 읽기: 인증된 사용자는 모든 후기 조회 가능
+      allow read: if isAuthenticated();
+
+      // 생성: 인증된 사용자만 후기 작성 가능
+      allow create: if isAuthenticated()
+                    && request.resource.data.reviewerId == userId();
+
+      // 수정: 본인이 작성한 후기만 수정 가능
+      allow update: if isAuthenticated()
+                    && resource.data.reviewerId == userId();
+
+      // 삭제: 본인이 작성한 후기만 삭제 가능
+      allow delete: if isAuthenticated()
+                    && resource.data.reviewerId == userId();
+    }
+
+    // ==================== 호스트 평점 (host_ratings) ====================
+    match /host_ratings/{hostId} {
+      // 읽기: 인증된 사용자는 모든 호스트 평점 조회 가능
+      allow read: if isAuthenticated();
+
+      // 생성: 인증된 사용자만 생성 가능
+      allow create: if isAuthenticated();
+
+      // 수정: 인증된 사용자만 수정 가능 (평점 집계용)
+      allow update: if isAuthenticated();
+
+      // 삭제: 불가 (기록 보존)
+      allow delete: if false;
+
+      // 개별 리뷰 서브컬렉션
+      match /reviews/{reviewId} {
+        // 읽기: 인증된 사용자는 조회 가능
+        allow read: if isAuthenticated();
+
+        // 생성: 인증된 사용자만 리뷰 작성 가능
+        allow create: if isAuthenticated()
+                      && request.resource.data.reviewerId == userId();
+
+        // 수정: 본인이 작성한 리뷰만 수정 가능
+        allow update: if isAuthenticated()
+                      && resource.data.reviewerId == userId();
+
+        // 삭제: 본인이 작성한 리뷰만 삭제 가능
+        allow delete: if isAuthenticated()
+                      && resource.data.reviewerId == userId();
+      }
+    }
+
+    // ==================== 신고 (reports) ====================
+    match /reports/{reportId} {
+      // 읽기: 본인이 신고한 내역만 조회 가능
+      allow read: if isAuthenticated()
+                  && resource.data.reporterId == userId();
+
+      // 생성: 인증된 사용자만 신고 가능
+      allow create: if isAuthenticated()
+                    && request.resource.data.reporterId == userId();
+
+      // 수정/삭제: 불가 (관리자만)
+      allow update, delete: if false;
+    }
+
+    // ==================== 배지 (badges) ====================
+    match /badges/{badgeId} {
+      // 읽기: 인증된 사용자는 조회 가능
+      allow read: if isAuthenticated();
+
+      // 생성/수정/삭제: 서버에서만 가능
+      allow create, update, delete: if false;
+    }
+
+    // ==================== 사용자 배지 (userBadges) ====================
+    match /userBadges/{userBadgeId} {
+      // 읽기: 인증된 사용자는 조회 가능
+      allow read: if isAuthenticated();
+
+      // 생성/수정/삭제: 서버에서만 가능
+      allow create, update, delete: if false;
+    }
+
+    // ==================== 기부/후원 (donations) ====================
+    match /donations/{donationId} {
+      // 읽기: 본인의 기부 내역만 조회 가능
+      allow read: if isAuthenticated()
+                  && resource.data.userId == userId();
+
+      // 생성: 인증된 사용자만 기부 기록 생성 가능
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == userId();
+
+      // 수정/삭제: 불가
+      allow update, delete: if false;
+    }
+
+    // ==================== 모임 히스토리 (meetingHistories) ====================
+    match /meetingHistories/{historyId} {
+      // 읽기: 관련 사용자만 조회 가능
+      allow read: if isAuthenticated()
+                  && (resource.data.hostId == userId()
+                      || userId() in resource.data.participantIds);
+
+      // 생성/수정/삭제: 서버에서만 가능
+      allow create, update, delete: if false;
+    }
+
+    // ==================== 앱 설정 (appConfig) ====================
+    match /appConfig/{configId} {
+      // 읽기: 누구나 조회 가능
+      allow read: if true;
+
+      // 생성/수정/삭제: 불가 (관리자 콘솔에서만)
+      allow create, update, delete: if false;
+    }
+  }
+}

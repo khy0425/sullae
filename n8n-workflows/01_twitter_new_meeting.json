@@ -1,0 +1,96 @@
+{
+  "name": "술래 - Twitter 새 모임 포스팅",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meeting-created",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "Webhook - Meeting Created",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 게임 타입 이모지 매핑\nconst gameEmojis = {\n  '경찰과 도둑': '👮',\n  '얼음땡': '🧊',\n  '숨바꼭질': '👀',\n  '깃발뺏기': '🚩',\n  '커스텀': '🎮'\n};\n\nconst data = $input.first().json;\nconst emoji = gameEmojis[data.gameTypeName] || '🏃';\n\n// 시간대별 인사말\nconst hour = new Date(data.meetingTime).getHours();\nlet greeting = '';\nif (hour < 12) greeting = '오전에 상쾌하게!';\nelse if (hour < 18) greeting = '오후 햇살 아래서!';\nelse greeting = '퇴근 후 시원하게!';\n\n// 트윗 텍스트 생성\nconst tweet = `${emoji} ${greeting}\n\n📍 ${data.location}\n🎮 ${data.gameTypeName}\n⏰ ${data.meetingTimeFormatted}\n👥 ${data.maxParticipants}명 모집\n\n참가코드: ${data.joinCode}\n\n#술래 #술래잡기 #동네모임 #야외활동`;\n\nreturn [{ json: { tweet, ...data } }];"
+      },
+      "id": "code-1",
+      "name": "Format Tweet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.tweet }}",
+        "additionalFields": {}
+      },
+      "id": "twitter-1",
+      "name": "Post Tweet",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "YOUR_TWITTER_CREDENTIAL_ID",
+          "name": "Twitter Sullae"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### 새 모임 트윗 발송 완료\n\n- 모임: {{ $json.title }}\n- 장소: {{ $json.location }}\n- 트윗 ID: {{ $json.id }}"
+      },
+      "id": "note-1",
+      "name": "Success Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Meeting Created": {
+      "main": [
+        [
+          {
+            "node": "Format Tweet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Tweet": {
+      "main": [
+        [
+          {
+            "node": "Post Tweet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "술래",
+      "createdAt": "2026-01-03T00:00:00.000Z",
+      "updatedAt": "2026-01-03T00:00:00.000Z"
+    },
+    {
+      "name": "Twitter",
+      "createdAt": "2026-01-03T00:00:00.000Z",
+      "updatedAt": "2026-01-03T00:00:00.000Z"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-03T00:00:00.000Z"
+}

@@ -1,0 +1,36 @@
+# Render Blueprint - n8n 배포 설정
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: sullae-n8n
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: N8N_BASIC_AUTH_ACTIVE
+        value: "true"
+      - key: N8N_BASIC_AUTH_USER
+        sync: false  # Render 대시보드에서 설정
+      - key: N8N_BASIC_AUTH_PASSWORD
+        sync: false  # Render 대시보드에서 설정
+      - key: N8N_HOST
+        fromService:
+          type: web
+          name: sullae-n8n
+          property: host
+      - key: N8N_PROTOCOL
+        value: "https"
+      - key: WEBHOOK_URL
+        fromService:
+          type: web
+          name: sullae-n8n
+          property: hostURL
+      - key: GENERIC_TIMEZONE
+        value: "Asia/Seoul"
+      - key: N8N_ENCRYPTION_KEY
+        generateValue: true
+    disk:
+      name: n8n-data
+      mountPath: /home/node/.n8n
+      sizeGB: 1

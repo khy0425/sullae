@@ -1,0 +1,41 @@
+{
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "mission100-app",
+          "appId": "1:628188340009:android:c98da9baa6d07b06682138",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "mission100-app",
+          "configurations": {
+            "android": "1:628188340009:android:c98da9baa6d07b06682138",
+            "ios": "1:628188340009:ios:2f163760da4b3a9e682138"
+          }
+        }
+      }
+    }
+  }
+}

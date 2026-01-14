@@ -1,0 +1,358 @@
+{
+  "@@locale": "ko",
+
+  "appName": "술래",
+  "appTagline": "함께 뛰어놀자!",
+
+  "navExplore": "둘러보기",
+  "navMyMeetings": "내 모임",
+  "navProfile": "프로필",
+
+  "createMeeting": "모임 만들기",
+  "gameType": "게임 종류",
+  "meetingTitle": "모임 제목",
+  "meetingTitleHint": "예: 한강공원에서 경찰과 도둑!",
+  "meetingTitleRequired": "모임 제목을 입력해주세요",
+  "meetingDescription": "모임 설명",
+  "meetingDescriptionHint": "어떤 모임인지 설명해주세요",
+  "location": "장소",
+  "locationHint": "예: 여의도 한강공원",
+  "locationRequired": "장소를 입력해주세요",
+  "locationDetail": "상세 위치 (선택)",
+  "locationDetailHint": "예: 물빛무대 앞",
+  "dateTime": "일시",
+  "maxParticipants": "모집 인원",
+  "participantsUnit": "{count}명",
+  "@participantsUnit": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "createMeetingFailed": "모임 생성에 실패했습니다",
+
+  "gameCopsAndRobbers": "경찰과 도둑",
+  "gameFreezeTag": "얼음땡",
+  "gameHideAndSeek": "숨바꼭질",
+  "gameCaptureFlag": "깃발뺏기",
+  "gameCustom": "커스텀",
+
+  "filterAll": "전체",
+
+  "noRecruitingMeetings": "모집중인 모임이 없습니다",
+  "createNewMeeting": "새로운 모임을 만들어보세요!",
+  "noJoinedMeetings": "참여한 모임이 없습니다",
+
+  "gamesPlayedCount": "게임 {count}회 참여",
+  "@gamesPlayedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "statParticipation": "참여",
+  "statHosting": "호스팅",
+  "statMvp": "MVP",
+
+  "changeNickname": "닉네임 변경",
+  "newNickname": "새 닉네임",
+  "notificationSettings": "알림 설정",
+  "help": "도움말",
+  "logout": "로그아웃",
+  "cancel": "취소",
+  "change": "변경",
+  "ok": "확인",
+  "no": "아니오",
+  "complete": "완료",
+  "later": "나중에",
+
+  "loginWithKakao": "카카오로 시작하기",
+  "loginWithGoogle": "Google로 시작하기",
+  "loginWithApple": "Apple로 시작하기",
+  "termsNotice": "시작하면 서비스 이용약관 및 개인정보 처리방침에\n동의하는 것으로 간주됩니다.",
+
+  "nicknameSetup": "닉네임 설정",
+  "enterNickname": "닉네임을 입력하세요",
+  "nicknameGuide": "게임에서 불릴 이름을\n정해주세요",
+  "nicknameHint": "2~10자, 한글/영문/숫자",
+  "nicknameFormat": "한글, 영문, 숫자 2~10자",
+  "nicknameRequired": "닉네임을 입력해주세요",
+  "nicknameTooShort": "2자 이상 입력해주세요",
+  "nicknameTooLong": "10자 이하로 입력해주세요",
+  "nicknameInvalid": "한글, 영문, 숫자만 사용할 수 있어요",
+  "checkingDuplicate": "중복 확인 중...",
+  "nicknameAvailable": "사용 가능한 닉네임이에요!",
+  "startGame": "게임 시작!",
+
+  "selectAgeGroup": "연령대 선택",
+  "ageGuide": "연령대를 알려주세요",
+  "ageGroupOptional": "선택 사항이에요. 모임 추천에 활용됩니다.",
+  "ageMatchingHelp": "비슷한 연령대끼리 매칭에 도움이 돼요\n(선택하지 않아도 괜찮아요)",
+  "ageGroup10s": "10대",
+  "ageGroup20s": "20대",
+  "ageGroup30s": "30대",
+  "ageGroup40sPlus": "40대 이상",
+  "skip": "건너뛰기",
+  "next": "다음",
+  "startPrivately": "비공개로 시작하기",
+  "signupFailed": "회원가입에 실패했어요. 다시 시도해주세요.",
+
+  "gameTime": "게임 시간",
+  "minutesUnit": "{count}분",
+  "@minutesUnit": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "teamAssignment": "팀 배정",
+  "shuffleTeamHint": "셔플 버튼을 눌러 팀을 배정하세요",
+  "startGameButton": "게임 시작",
+  "remainingTime": "남은 시간",
+  "shuffleTeam": "팀 섞기",
+  "endGame": "게임 종료",
+  "gameEndTitle": "게임 종료!",
+  "endGameConfirmTitle": "게임을 종료할까요?",
+  "endGameConfirmMessage": "진행 중인 게임을 종료합니다.",
+  "mvpVoteConfirm": "MVP 투표를 시작하시겠습니까?",
+
+  "pause": "일시정지",
+  "resume": "재개",
+  "paused": "일시정지",
+  "tapToPause": "탭하여 일시정지",
+  "tapToResume": "탭하여 재개",
+  "mvpVoteButton": "MVP 투표",
+  "mvpVoteCreated": "MVP 투표가 생성되었습니다!",
+
+  "roleCops": "경찰",
+  "roleRobbers": "도둑",
+  "roleSeeker": "술래",
+  "roleRunner": "도망자",
+  "roleHider": "숨는이",
+  "roleTeamA": "A팀",
+  "roleTeamB": "B팀",
+
+  "meetingChat": "채팅",
+  "meetingInfo": "정보",
+  "meetingParticipants": "참가자",
+  "meetingHost": "방장",
+  "meetingStatus": "상태",
+  "meetingStatusRecruiting": "모집중",
+  "meetingStatusInProgress": "진행중",
+  "meetingStatusFinished": "종료",
+
+  "joinMeeting": "참여하기",
+  "leaveMeeting": "나가기",
+  "cancelMeeting": "모임 취소",
+  "cancelMeetingConfirm": "정말 모임을 취소하시겠습니까?",
+  "cancelMeetingButton": "취소하기",
+  "startMeeting": "게임 시작하기",
+  "joinedMeeting": "모임에 참여했습니다!",
+  "noMessages": "아직 메시지가 없습니다",
+
+  "quickMessageArrived": "지금 도착했어요",
+  "quickMessageLate5": "5분 늦어요",
+  "quickMessageLate10": "10분 늦어요",
+  "quickMessageReady": "게임 시작 가능해요",
+  "quickMessageOnMyWay": "가고 있어요",
+  "quickMessageCantMake": "오늘 못 갈 것 같아요",
+  "quickMessageWhereAreYou": "어디쯤이세요?",
+  "quickMessageStartSoon": "곧 시작해요",
+
+  "enterMessage": "메시지를 입력하세요...",
+  "send": "전송",
+
+  "systemSender": "시스템",
+  "meetingCreated": "모임이 생성되었습니다.",
+  "meetingCancelled": "모임이 취소되었습니다.",
+  "gameStarted": "게임이 시작되었습니다!",
+  "userJoined": "{nickname}님이 참가했습니다.",
+  "@userJoined": {
+    "placeholders": {
+      "nickname": {"type": "String"}
+    }
+  },
+  "userLeft": "{nickname}님이 나갔습니다.",
+  "@userLeft": {
+    "placeholders": {
+      "nickname": {"type": "String"}
+    }
+  },
+
+  "phaseRoleConfirm": "역할 확인",
+  "phaseRoleConfirmCopsDesc": "경찰/도둑 역할을 확인하세요",
+  "phaseRoleConfirmSeekerDesc": "술래/도망자 역할을 확인하세요",
+  "phaseRoleConfirmHiderDesc": "술래/숨는이 역할을 확인하세요",
+  "phasePrisonConfirm": "감옥 위치 확인",
+  "phasePrisonConfirmDesc": "감옥 위치를 모두가 확인합니다",
+  "phaseThiefHide": "도둑 숨기",
+  "phaseThiefHideDesc": "도둑이 먼저 흩어집니다",
+  "phasePursuit": "추격 시작",
+  "phasePursuitDesc": "경찰이 도둑을 잡으러 갑니다",
+  "phaseGameEnd": "게임 종료",
+  "phaseGameEndCopsDesc": "타이머 종료 또는 전원 체포 시",
+  "phaseGameEndFreezeDesc": "타이머 종료 또는 전원 얼음 시",
+  "phaseGameEndHideDesc": "타이머 종료 또는 전원 발견 시",
+  "phaseGameEndFlagDesc": "목표 점수 달성 또는 타이머 종료",
+  "phasePrep": "준비",
+  "phasePrepDesc": "도망자가 흩어집니다",
+  "phaseGameStart": "게임 시작",
+  "phaseGameStartFreezeDesc": "술래가 \"얼음땡!\" 외치고 시작",
+  "phaseHide": "숨기",
+  "phaseHideDesc": "술래가 눈 감고 세는 동안 숨기",
+  "phaseFindStart": "찾기 시작",
+  "phaseFindStartDesc": "술래가 숨은 사람을 찾습니다",
+  "phaseTeamConfirm": "팀 확인",
+  "phaseTeamConfirmDesc": "A팀/B팀 진영을 확인하세요",
+  "phaseFlagPlace": "깃발 배치",
+  "phaseFlagPlaceDesc": "각 팀 진영에 깃발을 배치합니다",
+  "phaseFlagStart": "상대 깃발을 가져오세요!",
+
+  "preferenceNone": "상관없음",
+  "preferenceRole1": "{role} 희망",
+  "@preferenceRole1": {
+    "placeholders": {
+      "role": {"type": "String"}
+    }
+  },
+  "teamBalanced": "팀이 균형잡혀 있습니다. 바로 시작할 수 있어요!",
+  "teamNoneWillBeRandom": "상관없음 인원이 랜덤 배치됩니다.",
+  "teamExcess": "{role} 희망자가 {count}명 초과입니다. {count}명이 랜덤으로 {otherRole}이 됩니다.",
+  "@teamExcess": {
+    "placeholders": {
+      "role": {"type": "String"},
+      "count": {"type": "int"},
+      "otherRole": {"type": "String"}
+    }
+  },
+  "teamNeedsAdjust": "{role} 희망자가 {count}명 초과입니다. 협의 후 조정하거나 그대로 시작할 수 있어요.",
+  "@teamNeedsAdjust": {
+    "placeholders": {
+      "role": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+  "teamUnbalanced": "팀 구성이 불균형합니다. 조정하거나 그대로 시작할 수 있어요.",
+
+  "localRulePrisonLocation": "감옥 위치",
+  "localRulePrisonLocationDesc": "잡힌 도둑이 대기하는 장소",
+  "localRuleJailBreak": "탈옥 허용",
+  "localRuleJailBreakDesc": "동료 도둑이 감옥 터치로 구출 가능",
+  "localRuleBoundary": "경계 설정",
+  "localRuleBoundaryDesc": "게임 영역 제한",
+  "localRuleSafeZone": "안전지대 금지",
+  "localRuleSafeZoneDesc": "안전지대 없이 진행",
+  "localRuleTagMethod": "터치 방식",
+  "localRuleTagMethodDesc": "양손 터치/한손 터치/어깨 터치",
+  "localRuleFreezeRelease": "얼음 해제",
+  "localRuleFreezeReleaseDesc": "동료가 터치하면 해제",
+  "localRuleSeekerCount": "술래 수 조정",
+  "localRuleSeekerCountDesc": "인원에 따라 술래 수 조절",
+  "localRuleHidingTime": "숨는 시간",
+  "localRuleHidingTimeDesc": "술래가 세는 시간 (예: 30초)",
+  "localRuleHintAllowed": "힌트 허용",
+  "localRuleHintAllowedDesc": "숨은 사람이 소리로 힌트 가능",
+  "localRuleFlagReturn": "깃발 반환",
+  "localRuleFlagReturnDesc": "터치당하면 깃발 제자리 반환",
+  "localRuleTeamTag": "팀 터치",
+  "localRuleTeamTagDesc": "상대 진영에서 터치당하면 감옥",
+
+  "joinWithCode": "코드로 참가",
+  "enterJoinCode": "참가 코드 입력",
+  "joinCodeHint": "6자리 코드",
+  "joinCodeInvalid": "6자리 코드를 입력해주세요",
+  "joinCodeNotFound": "모임을 찾을 수 없습니다",
+  "join": "참가",
+
+  "search": "검색",
+  "searchMeetings": "모임 검색...",
+  "filterTimeAll": "전체",
+  "filterTimeToday": "오늘",
+  "filterTimeTomorrow": "내일",
+  "filterTimeThisWeek": "이번 주",
+  "showRecruitingOnly": "모집중만",
+  "showAll": "전체 보기",
+  "activeFilters": "필터 {count}개 적용중",
+  "@activeFilters": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "clearFilters": "필터 초기화",
+
+  "filterTitle": "필터",
+  "applyFilters": "적용하기",
+  "resetFilters": "초기화",
+
+  "filterRegion": "지역",
+  "regionAll": "전체",
+  "regionSeoul": "서울",
+  "regionGyeonggi": "경기",
+  "regionIncheon": "인천",
+  "regionBusan": "부산",
+  "regionDaegu": "대구",
+  "regionDaejeon": "대전",
+  "regionGwangju": "광주",
+  "regionUlsan": "울산",
+  "regionSejong": "세종",
+  "regionGangwon": "강원",
+  "regionChungbuk": "충북",
+  "regionChungnam": "충남",
+  "regionJeonbuk": "전북",
+  "regionJeonnam": "전남",
+  "regionGyeongbuk": "경북",
+  "regionGyeongnam": "경남",
+  "regionJeju": "제주",
+
+  "filterAgeGroup": "희망 연령대",
+  "ageGroupAll": "상관없음",
+  "ageGroupTeens": "10대",
+  "ageGroupTwenties": "20대",
+  "ageGroupThirties": "30대",
+  "ageGroupFortyPlus": "40대 이상",
+
+  "filterGroupSize": "모집 인원",
+  "groupSizeSmall": "소규모 (4-8명)",
+  "groupSizeMedium": "중규모 (9-15명)",
+  "groupSizeLarge": "대규모 (16명+)",
+
+  "filterDifficulty": "분위기",
+  "difficultyCasual": "가볍게",
+  "difficultyCompetitive": "진지하게",
+  "difficultyBeginner": "초보 환영",
+
+  "moreFilters": "상세 필터",
+
+  "buyCoffee": "커피 한 잔 사주기",
+  "buyCoffeeDescription": "개발자를 응원할 수 있어요",
+  "buyCoffeeButton": "응원하기",
+  "donationMessage": "이 앱이 도움이 되었다면 선택적으로 응원할 수 있어요.\n광고 없는 버전이나 추가 기능과는 무관해요.",
+  "donationThanks": "감사합니다! 더 좋은 앱을 만들게요 ☕",
+  "donationFailed": "구매에 실패했어요. 나중에 다시 시도해주세요.",
+  "donationHint": "설정에서 '커피 한 잔 사주기'로 개발자를 응원할 수 있어요 ☕",
+
+  "shareMeeting": "모임 공유하기",
+  "gatherPeople": "사람 모으기",
+  "gatherPeopleDesc": "초대 메시지를 만들어 공유하세요",
+  "whereToShare": "어디서 공유할까요?",
+  "messageStyle": "메시지 스타일",
+  "toneCasual": "편하게",
+  "toneCasualDesc": "친구들에게",
+  "toneEnthusiastic": "활기차게",
+  "toneEnthusiasticDesc": "동네 모집",
+  "chatLinkOptional": "채팅방 링크 (선택)",
+  "chatLinkHint": "오픈채팅 링크를 넣으면 메시지에 포함됩니다",
+  "preview": "미리보기",
+  "copyMessage": "메시지 복사하기",
+  "messageCopied": "초대 메시지가 복사되었습니다",
+  "copyAndPasteHint": "복사 후 카카오톡이나 SNS에 붙여넣기 하세요",
+  "joinCode": "참가코드",
+  "joinCodeCopied": "참가코드가 복사되었습니다",
+  "copyCode": "코드 복사",
+  "qrCode": "QR 코드",
+  "showToFriends": "친구에게 이 화면을 보여주세요",
+  "externalChatLink": "외부 채팅방 링크",
+  "externalChatLinkHint": "카카오 오픈채팅 등 외부 채팅방 URL",
+  "goToChatroom": "채팅방 바로가기",
+  "channelKakao": "카카오톡",
+  "channelOpenChat": "오픈채팅",
+  "channelInstagram": "인스타그램",
+  "channelCommunity": "커뮤니티"
+}

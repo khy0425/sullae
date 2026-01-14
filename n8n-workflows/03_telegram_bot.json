@@ -1,0 +1,147 @@
+{
+  "name": "술래 - Telegram 봇 알림",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meeting-created",
+        "options": {}
+      },
+      "id": "webhook-tg-1",
+      "name": "Webhook - New Meeting",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "daily-stats",
+        "options": {}
+      },
+      "id": "webhook-tg-2",
+      "name": "Webhook - Daily Stats",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// 게임 타입 이모지\nconst gameEmojis = {\n  '경찰과 도둑': '👮',\n  '얼음땡': '🧊',\n  '숨바꼭질': '👀',\n  '깃발뺏기': '🚩',\n  '커스텀': '🎮'\n};\nconst emoji = gameEmojis[data.gameTypeName] || '🏃';\n\nconst message = `${emoji} *새로운 술래잡기 모임!*\n\n📍 장소: ${data.location}\n🎮 게임: ${data.gameTypeName}\n⏰ 시간: ${data.meetingTimeFormatted}\n👥 모집: ${data.maxParticipants}명\n\n🔑 참가코드: \\`${data.joinCode}\\`\n\n[앱에서 참가하기](https://sullae.app/join/${data.joinCode})`;\n\nreturn [{ json: { message, chatId: 'YOUR_TELEGRAM_CHAT_ID' } }];"
+      },
+      "id": "code-tg-1",
+      "name": "Format Telegram Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst stats = data.stats;\n\nconst message = `📊 *술래 일일 리포트*\n📅 ${data.date}\n\n📈 오늘의 성과:\n• 신규 가입: ${stats.newUsers}명\n• 모임 생성: ${stats.newMeetings}개\n\n📊 누적 현황:\n• 총 사용자: ${stats.totalUsers.toLocaleString()}명\n• 총 모임: ${stats.totalMeetings.toLocaleString()}개`;\n\nreturn [{ json: { message, chatId: 'YOUR_TELEGRAM_ADMIN_CHAT_ID' } }];"
+      },
+      "id": "code-tg-2",
+      "name": "Format Stats Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 500]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "disable_web_page_preview": false
+        }
+      },
+      "id": "telegram-1",
+      "name": "Send Telegram - New Meeting",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [650, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Sullae Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-2",
+      "name": "Send Telegram - Stats",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [650, 500],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Sullae Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - New Meeting": {
+      "main": [
+        [
+          {
+            "node": "Format Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Daily Stats": {
+      "main": [
+        [
+          {
+            "node": "Format Stats Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram - New Meeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Stats Message": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram - Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "술래"
+    },
+    {
+      "name": "Telegram"
+    }
+  ]
+}
