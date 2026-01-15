@@ -4,6 +4,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz_data;
 
 /// 푸시 알림 서비스
 /// - 모임 시작 30분 전 알림
@@ -29,6 +31,10 @@ class NotificationService {
   /// 알림 서비스 초기화
   Future<void> initialize() async {
     if (_isInitialized) return;
+
+    // Timezone 초기화 (한국 시간대 사용)
+    tz_data.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
 
     // 권한 요청
     await _requestPermission();
@@ -192,6 +198,7 @@ class NotificationService {
   }
 
   /// 모임 시작 알림 예약 (30분 전)
+  /// zonedSchedule을 사용하여 앱이 종료되어도 알림이 동작하도록 함
   Future<void> scheduleMeetingReminder({
     required String meetingId,
     required String title,
@@ -202,8 +209,8 @@ class NotificationService {
     // 이미 지난 시간이면 예약하지 않음
     if (reminderTime.isBefore(DateTime.now())) return;
 
-    // 알림 ID는 meetingId의 해시값 사용
-    final notificationId = meetingId.hashCode;
+    // 알림 ID는 meetingId의 해시값 사용 (양수로 변환)
+    final notificationId = meetingId.hashCode.abs() % 2147483647;
 
     const androidDetails = AndroidNotificationDetails(
       _channelId,
@@ -225,28 +232,34 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    // TZDateTime 없이 간단하게 처리
-    // 실제로는 flutter_timezone과 함께 사용하는 것이 좋음
-    final delay = reminderTime.difference(DateTime.now());
+    // TZDateTime으로 변환
+    final tzReminderTime = tz.TZDateTime.from(reminderTime, tz.local);
 
-    Future.delayed(delay, () {
-      _localNotifications.show(
+    try {
+      await _localNotifications.zonedSchedule(
         notificationId,
         '🏃 모임 시작 30분 전!',
         '$title 모임이 곧 시작됩니다',
+        tzReminderTime,
         details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: null,
         payload: meetingId,
       );
-    });
 
-    if (kDebugMode) {
-      print('Scheduled reminder for $meetingId at $reminderTime');
+      if (kDebugMode) {
+        print('Scheduled reminder for $meetingId at $reminderTime');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Failed to schedule reminder: $e');
+      }
     }
   }
 
   /// 예약된 알림 취소
   Future<void> cancelMeetingReminder(String meetingId) async {
-    final notificationId = meetingId.hashCode;
+    final notificationId = meetingId.hashCode.abs() % 2147483647;
     await _localNotifications.cancel(notificationId);
   }
 
@@ -310,15 +323,17 @@ class NotificationService {
 
 /// 알림 타입
 enum NotificationType {
-  general,        // 일반 알림
-  meeting,        // 모임 관련
-  newParticipant, // 새 참가자
-  gameStart,      // 게임 시작
-  hostTransfer,   // 방장 위임
-  badge,          // 배지 획득
-  reminder,       // 리마인더
-  reviewRequest,  // 후기 요청
+  general,          // 일반 알림
+  meeting,          // 모임 관련
+  newParticipant,   // 새 참가자
+  gameStart,        // 게임 시작
+  hostTransfer,     // 방장 위임
+  badge,            // 배지 획득
+  reminder,         // 리마인더
+  reviewRequest,    // 후기 요청
   hostAnnouncement, // 방장 공지
+  meetingUpdated,   // 모임 정보 변경
+  meetingCancelled, // 모임 취소
 }
 
 /// 알림 템플릿
@@ -407,6 +422,39 @@ class NotificationTemplates {
     return (
       title: '마감 임박! 🔥',
       body: '"$meetingTitle" 모임 $remaining자리 남았어요!',
+    );
+  }
+
+  /// 모임 정보 변경 알림 (참가자들에게)
+  static ({String title, String body}) meetingUpdated({
+    required String meetingTitle,
+    required String changes,
+  }) {
+    return (
+      title: '📝 모임 정보가 변경되었습니다',
+      body: '"$meetingTitle" $changes',
+    );
+  }
+
+  /// 모임 시간 변경 알림 (참가자들에게)
+  static ({String title, String body}) meetingTimeChanged({
+    required String meetingTitle,
+    required String newTime,
+  }) {
+    return (
+      title: '⏰ 모임 시간이 변경되었습니다',
+      body: '"$meetingTitle" 새로운 시간: $newTime',
+    );
+  }
+
+  /// 모임 장소 변경 알림 (참가자들에게)
+  static ({String title, String body}) meetingLocationChanged({
+    required String meetingTitle,
+    required String newLocation,
+  }) {
+    return (
+      title: '📍 모임 장소가 변경되었습니다',
+      body: '"$meetingTitle" 새로운 장소: $newLocation',
     );
   }
 }

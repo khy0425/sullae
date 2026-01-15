@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,7 @@ import '../../utils/app_theme.dart';
 import '../../widgets/share_dialog.dart';
 import '../../widgets/host_rating_widget.dart';
 import '../../widgets/quick_message_widget.dart';
+import '../../widgets/ad_banner_widget.dart';
 import '../game/game_screen.dart';
 
 class MeetingDetailScreen extends StatefulWidget {
@@ -92,6 +94,18 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
                         ],
                       ),
                     ),
+                    // 모임 수정 (모집중일 때만)
+                    if (meeting.status == MeetingStatus.recruiting)
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, size: AppDimens.iconM),
+                            SizedBox(width: AppDimens.paddingS),
+                            Text('모임 수정'),
+                          ],
+                        ),
+                      ),
                     // 방장 위임 (참가자가 2명 이상일 때만)
                     if (meeting.participantIds.length > 1)
                       PopupMenuItem(
@@ -218,6 +232,9 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
           ),
         );
         break;
+      case 'edit':
+        _showEditMeetingDialog(meeting, l10n);
+        break;
       case 'cancel':
         _showCancelDialog(meeting, l10n);
         break;
@@ -228,6 +245,230 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
         _showTransferHostDialog(meeting, l10n);
         break;
     }
+  }
+
+  void _showEditMeetingDialog(MeetingModel meeting, AppLocalizations l10n) {
+    final authProvider = context.read<AuthProvider>();
+    final meetingProvider = context.read<MeetingProvider>();
+
+    // 초기값 설정
+    final titleController = TextEditingController(text: meeting.title);
+    final descController = TextEditingController(text: meeting.description);
+    final locationController = TextEditingController(text: meeting.location);
+    final locationDetailController = TextEditingController(text: meeting.locationDetail ?? '');
+    DateTime selectedDateTime = meeting.meetingTime;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.edit, color: AppColors.primary, size: 24),
+              SizedBox(width: AppDimens.paddingS),
+              Text('모임 수정'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 제목
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: '모임 제목',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+                SizedBox(height: AppDimens.paddingM),
+
+                // 설명
+                TextField(
+                  controller: descController,
+                  decoration: InputDecoration(
+                    labelText: '설명 (선택)',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  maxLines: 2,
+                ),
+                SizedBox(height: AppDimens.paddingM),
+
+                // 장소
+                TextField(
+                  controller: locationController,
+                  decoration: InputDecoration(
+                    labelText: '장소',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+                SizedBox(height: AppDimens.paddingM),
+
+                // 상세 장소
+                TextField(
+                  controller: locationDetailController,
+                  decoration: InputDecoration(
+                    labelText: '상세 장소 (선택)',
+                    hintText: '예: 정문 앞, 2층 카페',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+                SizedBox(height: AppDimens.paddingM),
+
+                // 날짜/시간
+                Text('모임 시간', style: AppTextStyles.labelSmall(context)),
+                SizedBox(height: AppDimens.paddingS),
+                InkWell(
+                  onTap: () async {
+                    // 날짜 선택
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDateTime,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 90)),
+                    );
+                    if (date != null) {
+                      // 시간 선택 (휠 피커)
+                      await showModalBottomSheet(
+                        context: context,
+                        builder: (ctx) => Container(
+                          height: 280,
+                          color: Theme.of(ctx).scaffoldBackgroundColor,
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+                                    ),
+                                    Text('시간 선택', style: AppTextStyles.titleSmall(ctx)),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: Text('완료', style: TextStyle(color: AppColors.primary)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Divider(height: 1),
+                              Expanded(
+                                child: CupertinoDatePicker(
+                                  mode: CupertinoDatePickerMode.time,
+                                  initialDateTime: DateTime(
+                                    date.year,
+                                    date.month,
+                                    date.day,
+                                    selectedDateTime.hour,
+                                    selectedDateTime.minute,
+                                  ),
+                                  use24hFormat: false,
+                                  minuteInterval: 5,
+                                  onDateTimeChanged: (newTime) {
+                                    setDialogState(() {
+                                      selectedDateTime = DateTime(
+                                        date.year,
+                                        date.month,
+                                        date.day,
+                                        newTime.hour,
+                                        newTime.minute,
+                                      );
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                      // 날짜만 변경된 경우에도 업데이트
+                      setDialogState(() {
+                        selectedDateTime = DateTime(
+                          date.year,
+                          date.month,
+                          date.day,
+                          selectedDateTime.hour,
+                          selectedDateTime.minute,
+                        );
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(AppDimens.paddingM),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today, color: AppColors.primary, size: 20),
+                        SizedBox(width: AppDimens.paddingS),
+                        Text(
+                          DateFormat('M월 d일 (E) HH:mm', 'ko_KR').format(selectedDateTime),
+                          style: AppTextStyles.body(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actionsPadding: EdgeInsets.all(AppDimens.paddingM),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(color: AppColors.border),
+                    ),
+                    child: Text('취소'),
+                  ),
+                ),
+                SizedBox(width: AppDimens.paddingM),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(dialogContext);
+                      final success = await meetingProvider.updateMeetingDetails(
+                        meetingId: meeting.id,
+                        hostId: authProvider.userId,
+                        title: titleController.text,
+                        description: descController.text,
+                        location: locationController.text,
+                        locationDetail: locationDetailController.text,
+                        meetingTime: selectedDateTime,
+                      );
+                      if (mounted) {
+                        ScaffoldMessenger.of(this.context).showSnackBar(
+                          SnackBar(
+                            content: Text(success ? '모임 정보가 수정되었습니다' : '수정에 실패했습니다'),
+                            backgroundColor: success ? Colors.green : Colors.red,
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text('저장'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showCancelDialog(MeetingModel meeting, AppLocalizations l10n) {
@@ -811,6 +1052,11 @@ class _InfoTab extends StatelessWidget {
             ),
           ),
         ),
+        SizedBox(height: AppDimens.paddingM),
+
+        // Banner Ad
+        const Center(child: AdBannerWidget()),
+        SizedBox(height: AppDimens.paddingL),
       ],
     );
   }
@@ -951,7 +1197,7 @@ class _ChatTab extends StatelessWidget {
 }
 
 /// 시스템 메시지 + 퀵메시지 통합 목록
-class _CombinedMessageList extends StatelessWidget {
+class _CombinedMessageList extends StatefulWidget {
   final String meetingId;
   final SystemMessageService systemMessageService;
   final AppLocalizations l10n;
@@ -963,85 +1209,69 @@ class _CombinedMessageList extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final quickMessageService = QuickMessageService();
+  State<_CombinedMessageList> createState() => _CombinedMessageListState();
+}
 
-    return StreamBuilder<List<dynamic>>(
-      stream: _combineStreams(systemMessageService, quickMessageService),
+class _CombinedMessageListState extends State<_CombinedMessageList> {
+  final QuickMessageService _quickMessageService = QuickMessageService();
+
+  @override
+  Widget build(BuildContext context) {
+    // 퀵메시지만 표시 (시스템 메시지는 나중에 추가)
+    return StreamBuilder<List<QuickMessage>>(
+      stream: _quickMessageService.getRecentMessages(widget.meetingId, limit: 50),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          );
+        // 에러 처리
+        if (snapshot.hasError) {
+          debugPrint('[ChatArea] 스트림 에러: ${snapshot.error}');
+          return _buildEmptyState();
         }
 
+        // 로딩 중이면 빈 상태 표시 (스피너 대신)
         final items = snapshot.data ?? [];
 
         if (items.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.flash_on,
-                  size: 48,
-                  color: AppColors.textTertiary,
-                ),
-                SizedBox(height: AppDimens.paddingM),
-                Text(
-                  '퀵메시지로 빠르게 소통하세요',
-                  style: AppTextStyles.body(context).copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                SizedBox(height: AppDimens.paddingS),
-                Text(
-                  '아래 버튼을 눌러 메시지를 보내세요',
-                  style: AppTextStyles.bodySmall(context).copyWith(
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-          );
+          return _buildEmptyState();
         }
 
         return ListView.builder(
           padding: EdgeInsets.all(AppDimens.paddingM),
           itemCount: items.length,
           itemBuilder: (context, index) {
-            final item = items[index];
-            if (item is SystemMessage) {
-              return _SystemMessageBubble(message: item);
-            } else if (item is QuickMessage) {
-              return _QuickMessageBubble(message: item);
-            }
-            return const SizedBox.shrink();
+            return _QuickMessageBubble(message: items[index]);
           },
         );
       },
     );
   }
 
-  Stream<List<dynamic>> _combineStreams(
-    SystemMessageService systemMessageService,
-    QuickMessageService quickMessageService,
-  ) async* {
-    // 두 스트림을 합쳐서 시간순 정렬
-    await for (final systemMessages in systemMessageService.getMessages(meetingId)) {
-      final quickMessages = await quickMessageService
-          .getRecentMessages(meetingId, limit: 50)
-          .first;
-
-      final combined = <dynamic>[...systemMessages, ...quickMessages];
-      combined.sort((a, b) {
-        final aTime = a is SystemMessage ? a.timestamp : (a as QuickMessage).sentAt;
-        final bTime = b is SystemMessage ? b.timestamp : (b as QuickMessage).sentAt;
-        return aTime.compareTo(bTime);
-      });
-
-      yield combined;
-    }
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.flash_on,
+            size: 48,
+            color: AppColors.textTertiary,
+          ),
+          SizedBox(height: AppDimens.paddingM),
+          Text(
+            '퀵메시지로 빠르게 소통하세요',
+            style: AppTextStyles.body(context).copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          SizedBox(height: AppDimens.paddingS),
+          Text(
+            '아래 버튼을 눌러 메시지를 보내세요',
+            style: AppTextStyles.bodySmall(context).copyWith(
+              color: AppColors.textTertiary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1238,10 +1468,22 @@ class _QuickMessageInputState extends State<_QuickMessageInput> {
         senderNickname: widget.userNickname,
         type: type,
       );
+      // 성공 피드백
+      if (mounted) {
+        final msgDef = QuickMessageDef.fromType(type);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${msgDef?.fullText ?? "메시지"} 전송됨'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
+        final errorMsg = e.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('메시지 전송 실패'), backgroundColor: Colors.red),
+          SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
         );
       }
     }

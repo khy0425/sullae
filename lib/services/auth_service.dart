@@ -116,37 +116,73 @@ class AuthService {
       // 카카오 사용자 정보 가져오기
       final kakaoUser = await kakao.UserApi.instance.me();
       final kakaoId = kakaoUser.id.toString();
-      final nickname = kakaoUser.kakaoAccount?.profile?.nickname;
+      final kakaoNickname = kakaoUser.kakaoAccount?.profile?.nickname;
 
-      // Firebase 익명 로그인 (카카오 ID 기반 커스텀 UID 사용)
-      // 실제 프로덕션에서는 Firebase Functions로 Custom Token 발급 권장
-      final userCredential = await _auth.signInAnonymously();
-      final user = userCredential.user;
-
-      if (user == null) {
-        return AuthResult.error('로그인에 실패했습니다.');
-      }
-
-      // 카카오 ID로 기존 사용자 확인
+      // 카카오 ID로 기존 사용자 확인 (Firebase 로그인 전에!)
       final existingUser = await _findUserByKakaoId(kakaoId);
-      final isNewUser = existingUser == null;
 
-      // 신규 사용자면 카카오 ID 저장
-      if (isNewUser) {
+      if (existingUser != null) {
+        // 기존 사용자: 기존 UID의 익명 계정으로 로그인 시도
+        // Firebase Anonymous Auth는 매번 새 UID를 생성하므로,
+        // 기존 사용자의 경우 Firestore 데이터만 사용
+
+        // 이미 Firebase에 로그인된 상태일 수 있으므로 먼저 로그아웃
+        if (_auth.currentUser != null && _auth.currentUser!.uid != existingUser.uid) {
+          await _auth.signOut();
+        }
+
+        // 익명 로그인 (새 UID 생성됨)
+        final userCredential = await _auth.signInAnonymously();
+        final newUser = userCredential.user;
+
+        if (newUser == null) {
+          return AuthResult.error('로그인에 실패했습니다.');
+        }
+
+        // 기존 사용자 데이터를 새 UID로 마이그레이션
+        if (newUser.uid != existingUser.uid) {
+          final oldData = await _usersRef.doc(existingUser.uid).get();
+          if (oldData.exists) {
+            final data = oldData.data() as Map<String, dynamic>;
+            data['migratedFrom'] = existingUser.uid;
+            data['migratedAt'] = Timestamp.now();
+            await _usersRef.doc(newUser.uid).set(data);
+            // 이전 문서 삭제
+            await _usersRef.doc(existingUser.uid).delete();
+          }
+        }
+
+        return AuthResult.success(
+          uid: newUser.uid,
+          email: null,
+          photoUrl: kakaoUser.kakaoAccount?.profile?.profileImageUrl,
+          isNewUser: false, // 기존 사용자
+          provider: LoginProvider.kakao,
+        );
+      } else {
+        // 신규 사용자: 새 익명 계정 생성
+        final userCredential = await _auth.signInAnonymously();
+        final user = userCredential.user;
+
+        if (user == null) {
+          return AuthResult.error('로그인에 실패했습니다.');
+        }
+
+        // 카카오 ID 저장 (프로필은 나중에 생성)
         await _usersRef.doc(user.uid).set({
           'kakaoId': kakaoId,
-          'kakaoNickname': nickname,
+          'kakaoNickname': kakaoNickname,
           'createdAt': Timestamp.now(),
         }, SetOptions(merge: true));
-      }
 
-      return AuthResult.success(
-        uid: existingUser?.uid ?? user.uid,
-        email: null,
-        photoUrl: kakaoUser.kakaoAccount?.profile?.profileImageUrl,
-        isNewUser: isNewUser,
-        provider: LoginProvider.kakao,
-      );
+        return AuthResult.success(
+          uid: user.uid,
+          email: null,
+          photoUrl: kakaoUser.kakaoAccount?.profile?.profileImageUrl,
+          isNewUser: true, // 신규 사용자
+          provider: LoginProvider.kakao,
+        );
+      }
     } on kakao.KakaoAuthException catch (e) {
       if (e.error == kakao.AuthErrorCause.accessDenied) {
         return AuthResult.cancelled();
@@ -217,6 +253,7 @@ class AuthService {
   // ============== 회원가입 완료 ==============
 
   /// 프로필 생성 (회원가입 마지막 단계)
+  /// merge: true를 사용하여 kakaoId 등 기존 데이터 보존
   Future<bool> createUserProfile({
     required String nickname,
     AgeRange? ageRange,
@@ -235,7 +272,11 @@ class AuthService {
         loginProvider: loginProvider,
       );
 
-      await _usersRef.doc(user.uid).set(userModel.toFirestore());
+      // merge: true로 kakaoId 등 기존 데이터 보존
+      await _usersRef.doc(user.uid).set(
+        userModel.toFirestore(),
+        SetOptions(merge: true),
+      );
       return true;
     } catch (e) {
       return false;

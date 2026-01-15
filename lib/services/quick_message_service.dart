@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/quick_message_model.dart';
 
 /// 퀵 메시지 서비스
@@ -8,7 +9,7 @@ class QuickMessageService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   CollectionReference _messagesRef(String meetingId) =>
-      _firestore.collection('meetings').doc(meetingId).collection('quick_messages');
+      _firestore.collection('meetings').doc(meetingId).collection('quickMessages');
 
   /// 퀵 메시지 전송
   Future<void> sendMessage({
@@ -18,6 +19,29 @@ class QuickMessageService {
     required QuickMessageType type,
     String? customText,
   }) async {
+    debugPrint('[QuickMessage] 전송 시작: meetingId=$meetingId, senderId=$senderId, type=${type.name}');
+
+    // 먼저 모임이 존재하고 사용자가 참가자인지 확인
+    try {
+      final meetingDoc = await _firestore.collection('meetings').doc(meetingId).get();
+      if (!meetingDoc.exists) {
+        debugPrint('[QuickMessage] 오류: 모임이 존재하지 않음');
+        throw Exception('모임을 찾을 수 없습니다');
+      }
+
+      final meetingData = meetingDoc.data();
+      final participantIds = List<String>.from(meetingData?['participantIds'] ?? []);
+      if (!participantIds.contains(senderId)) {
+        debugPrint('[QuickMessage] 오류: 사용자가 참가자 목록에 없음');
+        debugPrint('[QuickMessage] participantIds: $participantIds');
+        debugPrint('[QuickMessage] senderId: $senderId');
+        throw Exception('모임 참가자만 메시지를 보낼 수 있습니다');
+      }
+    } catch (e) {
+      debugPrint('[QuickMessage] 참가자 확인 실패: $e');
+      rethrow;
+    }
+
     final message = QuickMessage(
       id: '',
       meetingId: meetingId,
@@ -28,7 +52,26 @@ class QuickMessageService {
       customText: customText,
     );
 
-    await _messagesRef(meetingId).add(message.toFirestore());
+    final data = message.toFirestore();
+    debugPrint('[QuickMessage] Firestore 데이터: $data');
+
+    try {
+      // 10초 타임아웃 추가
+      final docRef = await _messagesRef(meetingId)
+          .add(data)
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              debugPrint('[QuickMessage] 타임아웃: 10초 초과');
+              throw Exception('전송 시간이 초과되었습니다. 네트워크를 확인해주세요.');
+            },
+          );
+      debugPrint('[QuickMessage] 전송 성공: docId=${docRef.id}');
+    } catch (e, stack) {
+      debugPrint('[QuickMessage] 전송 실패: $e');
+      debugPrint('[QuickMessage] 스택: $stack');
+      rethrow;
+    }
   }
 
   /// 커스텀 공지 전송 (방장 전용, 쿨타임 적용)
@@ -72,15 +115,22 @@ class QuickMessageService {
 
   /// 마지막 커스텀 공지 조회
   Future<QuickMessage?> _getLastCustomAnnouncement(String meetingId, String hostId) async {
-    final snapshot = await _messagesRef(meetingId)
-        .where('senderId', isEqualTo: hostId)
-        .where('type', isEqualTo: QuickMessageType.customAnnounce.index)
-        .orderBy('sentAt', descending: true)
-        .limit(1)
-        .get();
+    try {
+      final snapshot = await _messagesRef(meetingId)
+          .where('senderId', isEqualTo: hostId)
+          .where('type', isEqualTo: QuickMessageType.customAnnounce.index)
+          .orderBy('sentAt', descending: true)
+          .limit(1)
+          .get()
+          .timeout(const Duration(seconds: 5));
 
-    if (snapshot.docs.isEmpty) return null;
-    return QuickMessage.fromFirestore(snapshot.docs.first);
+      if (snapshot.docs.isEmpty) return null;
+      return QuickMessage.fromFirestore(snapshot.docs.first);
+    } catch (e) {
+      // 인덱스 미생성 등의 오류 시 쿨타임 체크 생략
+      debugPrint('[QuickMessage] 마지막 공지 조회 실패 (쿨타임 체크 생략): $e');
+      return null;
+    }
   }
 
   /// 최근 메시지 스트림 (실시간)

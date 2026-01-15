@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/meeting_model.dart';
@@ -106,39 +107,110 @@ class _GameScreenState extends State<GameScreen> {
   void _startGame() async {
     if (_teamAssignments == null) return;
 
-    final sessionId = await _gameService.startGameSession(
-      meetingId: widget.meeting.id,
-      gameType: widget.meeting.gameType,
-      teams: _teamAssignments!,
-      durationMinutes: _timerSeconds ~/ 60,
-    );
+    try {
+      // 로딩 상태 표시
+      setState(() {
+        _isGameStarted = true; // 일단 화면 전환
+      });
 
-    setState(() {
-      _sessionId = sessionId;
-      _isGameStarted = true;
-    });
+      final sessionId = await _gameService.startGameSession(
+        meetingId: widget.meeting.id,
+        gameType: widget.meeting.gameType,
+        teams: _teamAssignments!,
+        durationMinutes: _timerSeconds ~/ 60,
+      );
 
-    _startTimer();
+      if (!mounted) return;
+
+      // 게임 시작 진동 (강하게 2번)
+      HapticFeedback.heavyImpact();
+      await Future.delayed(const Duration(milliseconds: 200));
+      HapticFeedback.heavyImpact();
+
+      setState(() {
+        _sessionId = sessionId;
+      });
+
+      _startTimer();
+    } catch (e) {
+      // 에러 발생 시 원래 상태로 복구
+      if (mounted) {
+        setState(() {
+          _isGameStarted = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('게임 시작 실패: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_timerSeconds > 0) {
         setState(() => _timerSeconds--);
+        // 타이머 알림 진동
+        _checkTimerVibration();
       } else {
         _endGame();
       }
     });
   }
 
+  /// 타이머 진동 알림 체크
+  void _checkTimerVibration() {
+    switch (_timerSeconds) {
+      case 300: // 5분 남음
+        HapticFeedback.mediumImpact();
+        break;
+      case 60: // 1분 남음
+        HapticFeedback.heavyImpact();
+        break;
+      case 30: // 30초 남음
+        HapticFeedback.heavyImpact();
+        break;
+      case 10: // 10초 남음
+      case 9:
+      case 8:
+      case 7:
+      case 6:
+      case 5:
+      case 4:
+      case 3:
+      case 2:
+      case 1:
+        HapticFeedback.lightImpact(); // 카운트다운 진동
+        break;
+    }
+  }
+
   void _endGame() async {
     _timer?.cancel();
+
+    // 진동 피드백 (게임 종료)
+    HapticFeedback.heavyImpact();
+
     if (_sessionId != null) {
-      _gameService.endGameSession(_sessionId!);
+      try {
+        await _gameService.endGameSession(_sessionId!);
+      } catch (e) {
+        // 세션 종료 실패해도 계속 진행
+      }
     }
 
-    // 게임 종료 시 전면 광고 표시
-    await AdService().showAdOnGameEnd();
+    if (!mounted) return;
+
+    // 게임 종료 시 전면 광고 표시 (에러 무시)
+    try {
+      await AdService().showAdOnGameEnd();
+    } catch (e) {
+      // 광고 실패해도 계속 진행
+    }
+
+    if (!mounted) return;
 
     _showMvpVoteDialog();
   }
@@ -387,7 +459,7 @@ class _GameScreenState extends State<GameScreen> {
                     children: [
                       IconButton(
                         onPressed: _timerSeconds > 300
-                            ? () => setState(() => _timerSeconds -= 60)
+                            ? () => setState(() => _timerSeconds -= 300) // 5분 단위
                             : null,
                         icon: const Icon(Icons.remove_circle_outline),
                         iconSize: AppDimens.iconL,
@@ -400,8 +472,8 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                       SizedBox(width: AppDimens.paddingM),
                       IconButton(
-                        onPressed: _timerSeconds < 1800
-                            ? () => setState(() => _timerSeconds += 60)
+                        onPressed: _timerSeconds < 3600
+                            ? () => setState(() => _timerSeconds += 300) // 5분 단위, 최대 60분
                             : null,
                         icon: const Icon(Icons.add_circle_outline),
                         iconSize: AppDimens.iconL,

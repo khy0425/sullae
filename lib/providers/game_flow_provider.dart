@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../models/meeting_model.dart';
 import '../services/game_service.dart';
@@ -173,11 +174,11 @@ class GameFlowProvider with ChangeNotifier {
   }
 
   void _vibrateShort() {
-    // HapticFeedback.lightImpact() - 실제 구현 시
+    HapticFeedback.lightImpact();
   }
 
   void _vibrateLong() {
-    // HapticFeedback.heavyImpact() - 실제 구현 시
+    HapticFeedback.heavyImpact();
   }
 
   void _onTimerEnd() {

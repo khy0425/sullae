@@ -34,8 +34,8 @@
       ]
     },
     {
-      "collectionGroup": "quick_messages",
-      "queryScope": "COLLECTION",
+      "collectionGroup": "quickMessages",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
         { "fieldPath": "senderId", "order": "ASCENDING" },
         { "fieldPath": "type", "order": "ASCENDING" },
@@ -43,8 +43,8 @@
       ]
     },
     {
-      "collectionGroup": "quick_messages",
-      "queryScope": "COLLECTION",
+      "collectionGroup": "quickMessages",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
         { "fieldPath": "type", "order": "ASCENDING" },
         { "fieldPath": "sentAt", "order": "DESCENDING" }

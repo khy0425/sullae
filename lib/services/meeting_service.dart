@@ -360,6 +360,58 @@ class MeetingService {
     });
   }
 
+  /// 모임 정보 수정 (방장만 가능)
+  Future<bool> updateMeetingDetails({
+    required String meetingId,
+    required String hostId,
+    String? title,
+    String? description,
+    String? location,
+    String? locationDetail,
+    DateTime? meetingTime,
+    int? maxParticipants,
+  }) async {
+    try {
+      final meeting = await getMeeting(meetingId);
+      if (meeting == null || meeting.hostId != hostId) {
+        return false;
+      }
+
+      // 모집중 상태에서만 수정 가능
+      if (meeting.status != MeetingStatus.recruiting) {
+        return false;
+      }
+
+      final updates = <String, dynamic>{};
+      if (title != null && title.trim().isNotEmpty) {
+        updates['title'] = title.trim();
+      }
+      if (description != null) {
+        updates['description'] = description.trim();
+      }
+      if (location != null && location.trim().isNotEmpty) {
+        updates['location'] = location.trim();
+      }
+      if (locationDetail != null) {
+        updates['locationDetail'] = locationDetail.trim().isEmpty ? null : locationDetail.trim();
+      }
+      if (meetingTime != null) {
+        updates['meetingTime'] = Timestamp.fromDate(meetingTime);
+      }
+      if (maxParticipants != null && maxParticipants >= meeting.currentParticipants) {
+        updates['maxParticipants'] = maxParticipants;
+      }
+
+      if (updates.isEmpty) return false;
+
+      await _meetingsRef.doc(meetingId).update(updates);
+      return true;
+    } catch (e) {
+      if (kDebugMode) print('Update meeting error: $e');
+      return false;
+    }
+  }
+
   // 모임 취소
   Future<void> cancelMeeting(String meetingId, String hostId) async {
     final meeting = await getMeeting(meetingId);

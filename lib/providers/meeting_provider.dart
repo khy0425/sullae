@@ -671,6 +671,99 @@ class MeetingProvider with ChangeNotifier {
     await _meetingService.updateMeetingStatus(meetingId, status);
   }
 
+  /// 모임 정보 수정 (방장만)
+  Future<bool> updateMeetingDetails({
+    required String meetingId,
+    required String hostId,
+    String? title,
+    String? description,
+    String? location,
+    String? locationDetail,
+    DateTime? meetingTime,
+    int? maxParticipants,
+  }) async {
+    _setLoading(true);
+    try {
+      // 변경 전 모임 정보 가져오기 (알림용)
+      final originalMeeting = await _meetingService.getMeeting(meetingId);
+
+      final success = await _meetingService.updateMeetingDetails(
+        meetingId: meetingId,
+        hostId: hostId,
+        title: title,
+        description: description,
+        location: location,
+        locationDetail: locationDetail,
+        meetingTime: meetingTime,
+        maxParticipants: maxParticipants,
+      );
+
+      // 참가자들에게 변경 알림 전송
+      if (success && originalMeeting != null && originalMeeting.participantIds.length > 1) {
+        final meetingTitle = title ?? originalMeeting.title;
+
+        // 시간 변경 알림
+        if (meetingTime != null && meetingTime != originalMeeting.meetingTime) {
+          final timeStr = '${meetingTime.month}/${meetingTime.day} ${meetingTime.hour.toString().padLeft(2, '0')}:${meetingTime.minute.toString().padLeft(2, '0')}';
+          final notification = NotificationTemplates.meetingTimeChanged(
+            meetingTitle: meetingTitle,
+            newTime: timeStr,
+          );
+          _notificationService.notifyMeetingParticipants(
+            meetingId: meetingId,
+            participantIds: originalMeeting.participantIds,
+            title: notification.title,
+            body: notification.body,
+            excludeUserId: hostId,
+          );
+
+          // 리마인더도 새 시간으로 업데이트
+          _notificationService.cancelMeetingReminder(meetingId);
+          _notificationService.scheduleMeetingReminder(
+            meetingId: meetingId,
+            title: meetingTitle,
+            meetingTime: meetingTime,
+          );
+        }
+        // 장소 변경 알림
+        else if (location != null && location != originalMeeting.location) {
+          final notification = NotificationTemplates.meetingLocationChanged(
+            meetingTitle: meetingTitle,
+            newLocation: location,
+          );
+          _notificationService.notifyMeetingParticipants(
+            meetingId: meetingId,
+            participantIds: originalMeeting.participantIds,
+            title: notification.title,
+            body: notification.body,
+            excludeUserId: hostId,
+          );
+        }
+        // 기타 변경 알림 (제목 등)
+        else if (title != null && title != originalMeeting.title) {
+          final notification = NotificationTemplates.meetingUpdated(
+            meetingTitle: title,
+            changes: '모임 제목이 변경되었습니다',
+          );
+          _notificationService.notifyMeetingParticipants(
+            meetingId: meetingId,
+            participantIds: originalMeeting.participantIds,
+            title: notification.title,
+            body: notification.body,
+            excludeUserId: hostId,
+          );
+        }
+      }
+
+      _setLoading(false);
+      return success;
+    } catch (e) {
+      _setError(e.toString());
+      _setLoading(false);
+      return false;
+    }
+  }
+
   /// 게임 시작 (방장만)
   Future<bool> startGame(String meetingId, String hostId) async {
     _setLoading(true);

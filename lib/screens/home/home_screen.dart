@@ -727,6 +727,13 @@ class _MyMeetingsTab extends StatelessWidget {
             style: AppTextStyles.titleMedium(context),
           ),
         ),
+        // Banner Ad
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Center(child: AdBannerWidget()),
+          ),
+        ),
         Consumer<MeetingProvider>(
           builder: (context, provider, _) {
             if (provider.myMeetings.isEmpty) {
@@ -878,12 +885,12 @@ class _ProfileTab extends StatelessWidget {
                     _MenuItem(
                       icon: GameIcons.notifications,
                       title: l10n.notificationSettings,
-                      onTap: () {},
+                      onTap: () => _showNotificationSettings(context, l10n),
                     ),
                     _MenuItem(
                       icon: GameIcons.info,
                       title: l10n.help,
-                      onTap: () {},
+                      onTap: () => _showHelpDialog(context, l10n),
                     ),
                     _MenuItem(
                       icon: Icons.discord,
@@ -967,6 +974,101 @@ class _ProfileTab extends StatelessWidget {
         );
       }
     }
+  }
+
+  /// 알림 설정 다이얼로그
+  void _showNotificationSettings(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          l10n.notificationSettings,
+          style: AppTextStyles.titleSmall(context),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _NotificationToggle(
+              title: '모임 알림',
+              subtitle: '새 모임이 등록되면 알려드려요',
+              initialValue: true,
+            ),
+            _NotificationToggle(
+              title: '참가 알림',
+              subtitle: '모임에 새 참가자가 있으면 알려드려요',
+              initialValue: true,
+            ),
+            _NotificationToggle(
+              title: '게임 알림',
+              subtitle: '게임 시작/종료 시 알려드려요',
+              initialValue: true,
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 도움말 다이얼로그
+  void _showHelpDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.help_outline, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text(
+              l10n.help,
+              style: AppTextStyles.titleSmall(context),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _HelpSection(
+                title: '모임 만들기',
+                content: '+ 버튼을 눌러 새 모임을 만들 수 있어요. 게임 종류, 장소, 시간을 설정하고 참가자를 모집해보세요.',
+              ),
+              _HelpSection(
+                title: '모임 참가하기',
+                content: '탐색 탭에서 원하는 모임을 찾아 참가할 수 있어요. 참가 코드가 있다면 QR 버튼을 눌러 입력하세요.',
+              ),
+              _HelpSection(
+                title: '게임 진행',
+                content: '모임 상세 화면에서 "게임 시작" 버튼을 눌러 게임을 시작할 수 있어요. 팀 배정 후 타이머가 시작됩니다.',
+              ),
+              _HelpSection(
+                title: '퀵 메시지',
+                content: '모임 중 간단한 상태 메시지를 보낼 수 있어요. "도착했어요", "늦어요" 등을 빠르게 전달하세요.',
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '더 궁금한 점이 있다면 디스코드 커뮤니티에서 문의해주세요!',
+                style: AppTextStyles.bodySmall(context).copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('확인'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// 커피 한 잔 사주기 다이얼로그
@@ -1150,3 +1252,94 @@ class _RoleStatsCard extends StatelessWidget {
 
 // _RoleStatChip 제거됨 - roleStats가 MVP에서 제거됨
 // v1.1+에서 Cloud Function 집계 후 복원 예정
+
+/// 알림 설정 토글 위젯
+class _NotificationToggle extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final bool initialValue;
+
+  const _NotificationToggle({
+    required this.title,
+    required this.subtitle,
+    required this.initialValue,
+  });
+
+  @override
+  State<_NotificationToggle> createState() => _NotificationToggleState();
+}
+
+class _NotificationToggleState extends State<_NotificationToggle> {
+  late bool _value;
+
+  @override
+  void initState() {
+    super.initState();
+    _value = widget.initialValue;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        widget.title,
+        style: AppTextStyles.body(context),
+      ),
+      subtitle: Text(
+        widget.subtitle,
+        style: AppTextStyles.caption(context).copyWith(
+          color: AppColors.textSecondary,
+        ),
+      ),
+      trailing: Switch(
+        value: _value,
+        onChanged: (value) {
+          setState(() => _value = value);
+          // TODO: SharedPreferences에 저장
+        },
+        activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.primary;
+          }
+          return AppColors.textSecondary;
+        }),
+      ),
+    );
+  }
+}
+
+/// 도움말 섹션 위젯
+class _HelpSection extends StatelessWidget {
+  final String title;
+  final String content;
+
+  const _HelpSection({
+    required this.title,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTextStyles.titleSmall(context).copyWith(
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            content,
+            style: AppTextStyles.bodySmall(context),
+          ),
+        ],
+      ),
+    );
+  }
+}

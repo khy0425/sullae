@@ -52,16 +52,19 @@ class _QuickMessageWidgetState extends State<QuickMessageWidget> {
       }
     } catch (e) {
       if (mounted) {
+        final errorMsg = e.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('메시지 전송 실패'),
+          SnackBar(
+            content: Text(errorMsg),
             backgroundColor: Colors.red,
           ),
         );
       }
     }
 
-    setState(() => _isSending = false);
+    if (mounted) {
+      setState(() => _isSending = false);
+    }
   }
 
   @override
@@ -327,22 +330,34 @@ class QuickMessageBottomSheet extends StatelessWidget {
                     message: msg,
                     onTap: () async {
                       final service = QuickMessageService();
-                      await service.sendMessage(
-                        meetingId: meetingId,
-                        senderId: userId,
-                        senderNickname: userNickname,
-                        type: msg.type,
-                      );
-
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${msg.fullText} 전송됨'),
-                            duration: const Duration(seconds: 1),
-                            backgroundColor: Colors.green,
-                          ),
+                      try {
+                        await service.sendMessage(
+                          meetingId: meetingId,
+                          senderId: userId,
+                          senderNickname: userNickname,
+                          type: msg.type,
                         );
+
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${msg.fullText} 전송됨'),
+                              duration: const Duration(seconds: 1),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          final errorMsg = e.toString().replaceFirst('Exception: ', '');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(errorMsg),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     },
                   );
@@ -577,29 +592,40 @@ class _CustomAnnouncementDialogState extends State<_CustomAnnouncementDialog> {
       _error = null;
     });
 
-    final errorMsg = await _service.sendCustomAnnouncement(
-      meetingId: widget.meetingId,
-      hostId: widget.hostId,
-      hostNickname: widget.hostNickname,
-      text: _controller.text,
-    );
+    try {
+      final errorMsg = await _service.sendCustomAnnouncement(
+        meetingId: widget.meetingId,
+        hostId: widget.hostId,
+        hostNickname: widget.hostNickname,
+        text: _controller.text,
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () => '전송 시간이 초과되었습니다. 다시 시도해주세요.',
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (errorMsg != null) {
+      if (errorMsg != null) {
+        setState(() {
+          _isSending = false;
+          _error = errorMsg;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('📢 공지가 전송되었습니다'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        widget.onSuccess();
+      }
+    } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isSending = false;
-        _error = errorMsg;
+        _error = '공지 전송 실패: 네트워크를 확인해주세요';
       });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('📢 공지가 전송되었습니다'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-      widget.onSuccess();
     }
   }
 

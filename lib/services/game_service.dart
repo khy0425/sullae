@@ -187,7 +187,7 @@ class GameService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Random _random = Random();
 
-  CollectionReference get _sessionsRef => _firestore.collection('game_sessions');
+  CollectionReference get _sessionsRef => _firestore.collection('games');
 
   // 팀 랜덤 배정
   List<TeamAssignment> assignTeams({

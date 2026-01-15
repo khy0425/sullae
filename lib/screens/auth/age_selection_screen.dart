@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/user_model.dart';
-import '../../services/auth_service.dart';
+import '../../providers/auth_provider.dart';
 import '../../utils/app_theme.dart';
 
 /// 연령대 선택 화면
@@ -23,31 +24,18 @@ class AgeSelectionScreen extends StatefulWidget {
 }
 
 class _AgeSelectionScreenState extends State<AgeSelectionScreen> {
-  final _authService = AuthService();
   AgeRange? _selectedAge;
   bool _isLoading = false;
-
-  LoginProvider get _loginProvider {
-    switch (widget.provider) {
-      case 'kakao':
-        return LoginProvider.kakao;
-      case 'google':
-        return LoginProvider.google;
-      case 'apple':
-        return LoginProvider.apple;
-      default:
-        return LoginProvider.kakao;
-    }
-  }
 
   Future<void> _complete() async {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
 
-    final success = await _authService.createUserProfile(
+    // AuthProvider를 통해 회원가입 완료 (상태 동기화)
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.completeSignup(
       nickname: widget.nickname,
       ageRange: _selectedAge,
-      loginProvider: _loginProvider,
     );
 
     if (!mounted) return;
@@ -55,6 +43,8 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
+      // AuthProvider.isLoggedIn이 true가 되므로 main.dart의 Consumer가
+      // 자동으로 HomeScreen으로 이동시킴
       Navigator.of(context).popUntil((route) => route.isFirst);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

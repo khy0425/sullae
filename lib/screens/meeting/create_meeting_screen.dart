@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -84,13 +85,57 @@ class _CreateMeetingScreenState extends State<CreateMeetingScreen> {
   }
 
   Future<void> _selectTime() async {
-    final picked = await showTimePicker(
+    // iOS 스타일 휠 피커로 시간 선택
+    await showModalBottomSheet(
       context: context,
-      initialTime: _selectedTime,
+      builder: (context) => Container(
+        height: 280,
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: Column(
+          children: [
+            // 상단 바
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('취소', style: TextStyle(color: AppColors.textSecondary)),
+                  ),
+                  Text('시간 선택', style: AppTextStyles.titleSmall(context)),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('완료', style: TextStyle(color: AppColors.primary)),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            // 휠 피커
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                initialDateTime: DateTime(
+                  _selectedDate.year,
+                  _selectedDate.month,
+                  _selectedDate.day,
+                  _selectedTime.hour,
+                  _selectedTime.minute,
+                ),
+                use24hFormat: false,
+                minuteInterval: 5, // 5분 단위
+                onDateTimeChanged: (DateTime newTime) {
+                  setState(() {
+                    _selectedTime = TimeOfDay(hour: newTime.hour, minute: newTime.minute);
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-    if (picked != null) {
-      setState(() => _selectedTime = picked);
-    }
   }
 
   Future<void> _createMeeting() async {
@@ -774,12 +819,25 @@ class _RegionSelectorState extends State<_RegionSelector> {
       (SeoulDistrict.gangseo, '강서구'),
       (SeoulDistrict.gwanak, '관악구'),
       (SeoulDistrict.gwangjin, '광진구'),
+      (SeoulDistrict.guro, '구로구'),
+      (SeoulDistrict.geumcheon, '금천구'),
+      (SeoulDistrict.nowon, '노원구'),
+      (SeoulDistrict.dobong, '도봉구'),
+      (SeoulDistrict.dongdaemun, '동대문구'),
+      (SeoulDistrict.dongjak, '동작구'),
       (SeoulDistrict.mapo, '마포구'),
       (SeoulDistrict.seodaemun, '서대문구'),
       (SeoulDistrict.seocho, '서초구'),
+      (SeoulDistrict.seongdong, '성동구'),
+      (SeoulDistrict.seongbuk, '성북구'),
       (SeoulDistrict.songpa, '송파구'),
+      (SeoulDistrict.yangcheon, '양천구'),
       (SeoulDistrict.yeongdeungpo, '영등포구'),
       (SeoulDistrict.yongsan, '용산구'),
+      (SeoulDistrict.eunpyeong, '은평구'),
+      (SeoulDistrict.jongno, '종로구'),
+      (SeoulDistrict.jung, '중구'),
+      (SeoulDistrict.jungnang, '중랑구'),
     ];
 
     return districts.map((d) {
@@ -807,8 +865,18 @@ class _RegionSelectorState extends State<_RegionSelector> {
       (GyeonggiDistrict.ansan, '안산'),
       (GyeonggiDistrict.anyang, '안양'),
       (GyeonggiDistrict.namyangju, '남양주'),
+      (GyeonggiDistrict.hwaseong, '화성'),
+      (GyeonggiDistrict.uijeongbu, '의정부'),
+      (GyeonggiDistrict.siheung, '시흥'),
       (GyeonggiDistrict.gimpo, '김포'),
+      (GyeonggiDistrict.gwangmyeong, '광명'),
+      (GyeonggiDistrict.hanam, '하남'),
+      (GyeonggiDistrict.gunpo, '군포'),
+      (GyeonggiDistrict.icheon, '이천'),
+      (GyeonggiDistrict.osan, '오산'),
       (GyeonggiDistrict.paju, '파주'),
+      (GyeonggiDistrict.pyeongtaek, '평택'),
+      (GyeonggiDistrict.other, '기타'),
     ];
 
     return districts.map((d) {
