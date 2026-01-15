@@ -81,6 +81,21 @@
 - MVP 투표
 - 호스트 평점
 
+### 8. 알림 시스템
+- **FCM 푸시 알림**: 모임 참가, 변경, 취소 시 자동 알림
+- **로컬 리마인더**: 모임 30분 전 알림 (앱 종료 후에도 동작)
+- **Discord 연동**: 지역별 채널에 새 모임 자동 알림
+
+### 9. 지역 필터링
+- 서울 25개 자치구 지원
+- 경기도 주요 도시 지원
+- 지역별 모임 검색
+
+### 10. 모임 관리
+- 모임 정보 수정 (시간, 장소, 설명)
+- 방장 위임 기능
+- 모임 취소/삭제
+
 ---
 
 ## Supported Games
@@ -101,13 +116,16 @@
 |----------|------------|
 | **Framework** | Flutter 3.x |
 | **State Management** | Provider |
-| **Backend** | Firebase (Firestore, Auth, Functions) |
+| **Backend** | Firebase (Firestore, Auth, Cloud Functions) |
 | **Authentication** | Google, Apple, Kakao 소셜 로그인 |
-| **Push Notification** | Firebase Cloud Messaging |
+| **Push Notification** | Firebase Cloud Messaging + Local Notifications |
+| **Scheduled Notifications** | timezone + zonedSchedule (앱 종료 후에도 동작) |
 | **Analytics** | Firebase Analytics |
 | **Crash Reporting** | Firebase Crashlytics |
-| **Monetization** | Google AdMob, In-App Purchase |
+| **Monetization** | Google AdMob (배너, 전면 광고) |
+| **In-App Purchase** | 커피 한 잔 사주기 (개발자 후원) |
 | **Location** | Geolocator |
+| **Automation** | n8n 웹훅 연동 (Discord 자동 알림) |
 
 ---
 
@@ -132,10 +150,21 @@ lib/
 ├── services/            # 비즈니스 로직
 │   ├── auth_service.dart
 │   ├── meeting_service.dart
-│   ├── game_service.dart
+│   ├── notification_service.dart
+│   ├── ad_service.dart
 │   └── ...
 ├── widgets/             # 재사용 위젯
+│   ├── ad_banner_widget.dart
+│   └── ...
 └── utils/               # 유틸리티
+
+functions/
+├── src/
+│   ├── index.ts           # Cloud Functions 진입점
+│   ├── notifications.ts   # FCM 푸시 알림
+│   └── webhooks/
+│       └── n8n.ts         # n8n 웹훅 (Discord 연동)
+└── package.json
 ```
 
 ---
@@ -231,6 +260,7 @@ lib/
 ## Roadmap
 
 ### ✅ v1.0 (MVP)
+
 - [x] 소셜 로그인 (Google, Apple, Kakao)
 - [x] 모임 생성/참가 시스템
 - [x] 6자리 참가 코드
@@ -239,15 +269,41 @@ lib/
 - [x] 게임 가이드 (로컬 룰, 준비물, 안전 수칙)
 - [x] 진동 타이머
 
-### 🚧 v1.1
+### ✅ v1.1
+
 - [x] 룰 프리셋 저장/불러오기
+- [x] FCM 푸시 알림 (Cloud Functions)
+- [x] 로컬 리마인더 (앱 종료 후에도 동작)
+- [x] 모임 정보 변경 알림
+- [x] 지역별 필터링 (서울 25개구, 경기도)
+- [x] 방장 위임 기능
+- [x] 모임 수정/삭제
+- [x] Discord 커뮤니티 연동
+- [x] 배너 광고 (AdMob)
+
+### 🚧 v1.2
+
 - [ ] QR코드 생성/스캔
 - [ ] 위치 기반 모임 검색
+- [ ] 전면 광고 최적화
 
 ### 📋 v2.0
+
 - [ ] 프리셋 공유 & 인기 랭킹
 - [ ] 게임 기록/통계
 - [ ] 커뮤니티 기능
+
+---
+
+## Community
+
+**Discord 커뮤니티**에서 지역별 모임 알림을 받아보세요!
+
+[![Discord](https://img.shields.io/badge/Discord-술래_커뮤니티-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/kK3v7ZGdTV)
+
+- 📍 지역별 채널 (서울, 경기, 부산 등)
+- 🎮 게임별 채널 (경찰과 도둑, 얼음땡 등)
+- 📢 새 모임 자동 알림 (n8n 연동)
 
 ---
 
