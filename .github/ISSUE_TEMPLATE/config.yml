@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord 커뮤니티
+    url: https://discord.gg/kK3v7ZGdTV
+    about: 질문이나 피드백은 Discord에서 나눠주세요!
+  - name: FAQ
+    url: https://github.com/khy0425/sullae/wiki
+    about: 자주 묻는 질문을 확인해주세요
